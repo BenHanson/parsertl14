@@ -22,7 +22,7 @@ public:
     static void dump(const rules &rules_, ostream &stream_)
     {
         const std::size_t start_ = rules_.start();
-        const production_deque &grammar_ = rules_.grammar();
+        const production_vector &grammar_ = rules_.grammar();
         const token_info_vector &tokens_info_ = rules_.tokens_info();
         const std::size_t terminals_ = tokens_info_.size();
             string_vector symbols_;
@@ -89,7 +89,7 @@ public:
         {
             if (seen_.find(iter_->_lhs) == seen_.end())
             {
-                typename production_deque::const_iterator lhs_iter_ = iter_;
+                auto lhs_iter_ = iter_;
                 std::size_t index_ = lhs_iter_ - grammar_.begin();
 
                 stream_ << symbols_[terminals_ + lhs_iter_->_lhs];
@@ -150,7 +150,7 @@ public:
 
     static void dump(const rules &rules_, const dfa &dfa_, ostream &stream_)
     {
-        const production_deque &grammar_ = rules_.grammar();
+        const production_vector &grammar_ = rules_.grammar();
         const std::size_t terminals_ = rules_.tokens_info().size();
         string_vector symbols_;
 
@@ -210,7 +210,7 @@ public:
 
 private:
     using production = typename rules::production;
-    using production_deque = typename rules::production_deque;
+    using production_vector = typename rules::production_vector;
     using string = std::basic_string<char_type>;
     using string_vector = typename rules::string_vector;
     using symbol = typename rules::symbol;
