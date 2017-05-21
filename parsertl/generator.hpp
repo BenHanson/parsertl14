@@ -464,7 +464,7 @@ public:
 private:
     using char_type = typename rules::char_type;
     using char_vector_deque = std::deque<char_vector>;
-    using grammar = typename rules::production_deque;
+    using grammar = typename rules::production_vector;
     using ostringstream = std::basic_ostringstream<char_type>;
     using size_t_vector = std::vector<std::size_t>;
     using hash_map = std::map<std::size_t, size_t_vector>;
@@ -504,15 +504,15 @@ private:
                 if (id_ < terminals_)
                 {
                     // TERMINAL
-                    rhs_._action = shift;
+                    rhs_.action = shift;
                 }
                 else
                 {
                     // NON_TERMINAL
-                    rhs_._action = go_to;
+                    rhs_.action = go_to;
                 }
 
-                rhs_._param = tran_.second;
+                rhs_.param = tran_.second;
                 fill_entry(rules_, d_._closure, symbols_,
                     lhs_, id_, rhs_, warnings_);
             }
@@ -552,7 +552,7 @@ private:
 
                         if (production_._lhs == start_)
                         {
-                            rhs_._action = accept;
+                            rhs_.action = accept;
                         }
 
                         fill_entry(rules_, d_._closure, symbols_,
@@ -722,9 +722,9 @@ private:
         { "ERROR", "SHIFT", "REDUCE", "GOTO", "ACCEPT" };
         bool error_ = false;
 
-        if (lhs_._action == error)
+        if (lhs_.action == error)
         {
-            if (lhs_._param == syntax_error)
+            if (lhs_.param == syntax_error)
             {
                 // No conflict
                 lhs_ = rhs_;
@@ -744,27 +744,27 @@ private:
                 token_info::token;
             const token_info *iter_ = &tokens_info_[id_];
 
-            if (lhs_._action == shift)
+            if (lhs_.action == shift)
             {
                 lhs_prec_ = iter_->_precedence;
                 lhs_assoc_ = iter_->_associativity;
             }
-            else if (lhs_._action == reduce)
+            else if (lhs_.action == reduce)
             {
-                lhs_prec_ = grammar_[lhs_._param]._precedence;
+                lhs_prec_ = grammar_[lhs_.param]._precedence;
             }
 
-            if (rhs_._action == shift)
+            if (rhs_.action == shift)
             {
                 rhs_prec_ = iter_->_precedence;
                 rhs_assoc_ = iter_->_associativity;
             }
-            else if (rhs_._action == reduce)
+            else if (rhs_.action == reduce)
             {
-                rhs_prec_ = grammar_[rhs_._param]._precedence;
+                rhs_prec_ = grammar_[rhs_.param]._precedence;
             }
 
-            if (lhs_._action == shift && rhs_._action == reduce)
+            if (lhs_.action == shift && rhs_.action == reduce)
             {
                 if (lhs_prec_ == 0 || rhs_prec_ == 0)
                 {
@@ -773,10 +773,10 @@ private:
                     {
                         std::ostringstream ss_;
 
-                        ss_ << actions_[lhs_._action];
+                        ss_ << actions_[lhs_.action];
                         dump_action(grammar_, terminals_, config_, symbols_,
                             id_, lhs_, ss_);
-                        ss_ << '/' << actions_[rhs_._action];
+                        ss_ << '/' << actions_[rhs_.action];
                         dump_action(grammar_, terminals_, config_, symbols_,
                             id_, rhs_, ss_);
                         ss_ << " conflict.\n";
@@ -793,10 +793,10 @@ private:
                         {
                             std::ostringstream ss_;
 
-                            ss_ << actions_[lhs_._action];
+                            ss_ << actions_[lhs_.action];
                             dump_action(grammar_, terminals_, config_,
                                 symbols_, id_, lhs_, ss_);
-                            ss_ << '/' << actions_[rhs_._action];
+                            ss_ << '/' << actions_[rhs_.action];
                             dump_action(grammar_, terminals_, config_,
                                 symbols_, id_, rhs_, ss_);
                             ss_ << " conflict.\n";
@@ -805,8 +805,8 @@ private:
 
                         break;
                     case token_info::nonassoc:
-                        lhs_._action = error;
-                        lhs_._param = non_associative;
+                        lhs_.action = error;
+                        lhs_.param = non_associative;
                         break;
                     case token_info::left:
                         lhs_ = rhs_;
@@ -818,7 +818,7 @@ private:
                     lhs_ = rhs_;
                 }
             }
-            else if (lhs_._action == reduce && rhs_._action == reduce)
+            else if (lhs_.action == reduce && rhs_.action == reduce)
             {
                 if (lhs_prec_ == 0 || rhs_prec_ == 0 || lhs_prec_ == rhs_prec_)
                 {
@@ -839,10 +839,10 @@ private:
         {
             std::ostringstream ss_;
 
-            ss_ << actions_[lhs_._action];
+            ss_ << actions_[lhs_.action];
             dump_action(grammar_, terminals_, config_, symbols_, id_, lhs_,
                 ss_);
-            ss_ << '/' << actions_[rhs_._action];
+            ss_ << '/' << actions_[rhs_.action];
             dump_action(grammar_, terminals_, config_, symbols_, id_, rhs_,
                 ss_);
             ss_ << " conflict.\n";
@@ -855,7 +855,7 @@ private:
         const string_vector &symbols_, const std::size_t id_,
         const typename state_machine::entry &entry_, std::ostringstream &ss_)
     {
-        if (entry_._action == shift)
+        if (entry_.action == shift)
         {
             for (const auto &c_ : config_)
             {
@@ -869,9 +869,9 @@ private:
                 }
             }
         }
-        else if (entry_._action == reduce)
+        else if (entry_.action == reduce)
         {
-            const production &production_ = grammar_[entry_._param];
+            const production &production_ = grammar_[entry_.param];
 
             dump_production(production_, static_cast<std::size_t>(~0),
                 terminals_, symbols_, ss_);

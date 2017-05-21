@@ -7,15 +7,16 @@
 #define PARSERTL_READ_BISON_HPP
 
 #include "generator.hpp"
-#include "parser.hpp"
+#include "lookup.hpp"
+#include "match_results.hpp"
+#include "token.hpp"
 
 namespace parsertl
 {
 void read_bison(const char *start_, const char *end_, rules &rules_)
 {
     rules grules_;
-    using parser = parser<lexertl::criterator>;
-    parser parser_;
+    parsertl::state_machine gsm_;
     lexertl::rules lrules_;
     lexertl::state_machine lsm_;
 
@@ -65,7 +66,7 @@ void read_bison(const char *start_, const char *end_, rules &rules_)
 
     std::string warnings_;
 
-    generator::build(grules_, parser_.sm, &warnings_);
+    generator::build(grules_, gsm_, &warnings_);
 
     lrules_.push_state("CODE");
     lrules_.push_state("FINISH");
@@ -123,69 +124,69 @@ void read_bison(const char *start_, const char *end_, rules &rules_)
     lexertl::generator::build(lrules_, lsm_);
 
     lexertl::criterator iter_(start_, end_, lsm_);
-    parser::token_vector productions_;
+    using token = parsertl::token<lexertl::criterator>;
+    typename token::token_vector productions_;
+    parsertl::match_results results_(iter_->id, gsm_);
 
-    parser_.init(iter_);
-
-    while (parser_.entry._action != error &&
-        parser_.entry._action != accept)
+    while (results_.entry.action != error &&
+        results_.entry.action != accept)
     {
-        switch (parser_.entry._action)
+        switch (results_.entry.action)
         {
             case reduce:
-                if (parser_.entry._param == token_index_)
+                if (results_.entry.param == token_index_)
                 {
-                    const parser::token &token_ =
-                        parser_.dollar(1, productions_);
-                    const std::string str_(token_.start, token_.end);
+                    const token &token_ =
+                        results_.dollar(gsm_, 1, productions_);
+                    const std::string str_(token_.first, token_.second);
 
                     rules_.token(str_.c_str());
                 }
-                else if (parser_.entry._param == left_index_)
+                else if (results_.entry.param == left_index_)
                 {
-                    const parser::token &token_ =
-                        parser_.dollar(1, productions_);
-                    const std::string str_(token_.start, token_.end);
+                    const token &token_ =
+                        results_.dollar(gsm_, 1, productions_);
+                    const std::string str_(token_.first, token_.second);
 
                     rules_.left(str_.c_str());
                 }
-                else if (parser_.entry._param == right_index_)
+                else if (results_.entry.param == right_index_)
                 {
-                    const parser::token &token_ =
-                        parser_.dollar(1, productions_);
-                    const std::string str_(token_.start, token_.end);
+                    const token &token_ =
+                        results_.dollar(gsm_, 1, productions_);
+                    const std::string str_(token_.first, token_.second);
 
                     rules_.right(str_.c_str());
                 }
-                else if (parser_.entry._param == nonassoc_index_)
+                else if (results_.entry.param == nonassoc_index_)
                 {
-                    const parser::token &token_ =
-                        parser_.dollar(1, productions_);
-                    const std::string str_(token_.start, token_.end);
+                    const token &token_ =
+                        results_.dollar(gsm_, 1, productions_);
+                    const std::string str_(token_.first, token_.second);
 
                     rules_.nonassoc(str_.c_str());
                 }
-                else if (parser_.entry._param == precedence_index_)
+                else if (results_.entry.param == precedence_index_)
                 {
-                    const parser::token &token_ =
-                        parser_.dollar(1, productions_);
-                    const std::string str_(token_.start, token_.end);
+                    const token &token_ =
+                        results_.dollar(gsm_, 1, productions_);
+                    const std::string str_(token_.first, token_.second);
 
                     rules_.precedence(str_.c_str());
                 }
-                else if (parser_.entry._param == start_index_)
+                else if (results_.entry.param == start_index_)
                 {
-                    const parser::token &name_ =
-                        parser_.dollar(1, productions_);
+                    const token &name_ =
+                        results_.dollar(gsm_, 1, productions_);
 
-                    rules_.start(std::string(name_.start, name_.end).c_str());
+                    rules_.start(std::string(name_.first, name_.second).c_str());
                 }
-                else if (parser_.entry._param == prod_index_)
+                else if (results_.entry.param == prod_index_)
                 {
-                    const parser::token &lhs_ = parser_.dollar(0, productions_);
-                    const parser::token &rhs_ = parser_.dollar(2, productions_);
-                    const std::string lhs_str_(lhs_.start, lhs_.end);
-                    const std::string rhs_str_(rhs_.start, rhs_.end);
+                    const token &lhs_ = results_.dollar(gsm_, 0, productions_);
+                    const token &rhs_ = results_.dollar(gsm_, 2, productions_);
+                    const std::string lhs_str_(lhs_.first, lhs_.second);
+                    const std::string rhs_str_(rhs_.first, rhs_.second);
 
                     rules_.push(lhs_str_.c_str(), rhs_str_.c_str());
                 }
@@ -193,10 +194,10 @@ void read_bison(const char *start_, const char *end_, rules &rules_)
                 break;
         }
 
-        parser_.next(iter_, productions_);
+        parsertl::lookup(gsm_, iter_, results_, productions_);
     }
 
-    if (parser_.entry._action == error)
+    if (results_.entry.action == error)
         throw std::runtime_error("Syntax error");
 }
 }

@@ -17,25 +17,25 @@ struct state_machine
 {
     struct entry
     {
-        action _action;
-        std::size_t _param;
+        eaction action;
+        std::size_t param;
 
         entry() :
-            _action(error),
-            _param(syntax_error)
+            action(error),
+            param(syntax_error)
         {
         }
 
-        entry(const action action_, const std::size_t param_) :
-            _action(action_),
-            _param(param_)
+        entry(const eaction action_, const std::size_t param_) :
+            action(action_),
+            param(param_)
         {
         }
 
         void clear()
         {
-            _action = error;
-            _param = syntax_error;
+            action = error;
+            param = syntax_error;
         }
     };
 

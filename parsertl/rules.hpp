@@ -90,7 +90,7 @@ public:
         }
     };
 
-    using production_deque = std::deque<production>;
+    using production_vector = std::vector<production>;
 
     struct token_info
     {
@@ -321,7 +321,7 @@ public:
         }
     }
 
-    const production_deque &grammar() const
+    const production_vector &grammar() const
     {
         return _grammar;
     }
@@ -389,7 +389,7 @@ private:
     string_size_t_map _non_terminals;
     nt_location_vector _nt_locations;
     string _start;
-    production_deque _grammar;
+    production_vector _grammar;
 
     token_info &info(const std::size_t id_)
     {
