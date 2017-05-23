@@ -13,12 +13,15 @@
 
 namespace parsertl
 {
-// Forward declaration:
+// Forward declarations:
 namespace details
 {
 template<typename iterator>
-void next(const state_machine &sm_, iterator &iter_, match_results &results_,
-    iterator &last_eoi_);
+void next(const state_machine &sm_, const std::set<std::size_t> &productions_,
+    iterator &iter_, match_results &results_, iterator &last_eoi_, bool &hit_);
+template<typename iterator>
+bool parse(const state_machine &sm_, const std::set<std::size_t> &productions_,
+    iterator &iter_, match_results &results_, bool &hit_);
 }
 
 // Equivalent of std::search().
@@ -39,13 +42,7 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
         while (results_.entry.action != accept &&
             results_.entry.action != error)
         {
-            if (results_.entry.action == reduce &&
-                productions_.find(results_.entry.param) != productions_.end())
-            {
-                hit_ = true;
-            }
-
-            details::next(sm_, curr_, results_, last_eoi_);
+            details::next(sm_, productions_, curr_, results_, last_eoi_, hit_);
         }
 
         if (results_.entry.action == accept)
@@ -74,8 +71,8 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
 namespace details
 {
 template<typename iterator>
-void next(const state_machine &sm_, iterator &iter_, match_results &results_,
-    iterator &last_eoi_)
+void next(const state_machine &sm_, const std::set<std::size_t> &productions_,
+    iterator &iter_, match_results &results_, iterator &last_eoi_, bool &hit_)
 {
     switch (results_.entry.action)
     {
@@ -104,7 +101,7 @@ void next(const state_machine &sm_, iterator &iter_, match_results &results_,
             results_.entry = ptr_[results_.token_id];
         }
 
-        if (ptr_->action != error)
+        if (ptr_->action != accept && ptr_->action != error)
         {
             match_results temp_ = results_;
             iterator i_;
@@ -112,7 +109,7 @@ void next(const state_machine &sm_, iterator &iter_, match_results &results_,
             temp_.token_id = 0;
             temp_.entry = *ptr_;
 
-            if (parse(sm_, i_, temp_))
+            if (parse(sm_, productions_, i_, temp_, hit_))
             {
                 last_eoi_ = iter_;
             }
@@ -160,6 +157,86 @@ void next(const state_machine &sm_, iterator &iter_, match_results &results_,
         break;
     }
     }
+}
+
+template<typename iterator>
+bool parse(const state_machine &sm_, const std::set<std::size_t> &productions_,
+    iterator &iter_, match_results &results_, bool &hit_)
+{
+    bool accept_ = false;
+    bool curr_hit_ = false;
+
+    while (results_.entry.action != error)
+    {
+        switch (results_.entry.action)
+        {
+        case error:
+            break;
+        case shift:
+            results_.stack.push_back(results_.entry.param);
+
+            if (results_.token_id != 0)
+            {
+                ++iter_;
+            }
+
+            results_.token_id = iter_->id;
+
+            if (results_.token_id == iterator::value_type::npos())
+            {
+                results_.entry.action = error;
+                results_.entry.param = unknown_token;
+            }
+            else
+            {
+                results_.entry = sm_._table[results_.stack.back() *
+                    sm_._columns + results_.token_id];
+            }
+
+            break;
+        case reduce:
+        {
+            const std::size_t size_ =
+                sm_._rules[results_.entry.param].second.size();
+
+            curr_hit_ = productions_.find(results_.entry.param) !=
+                productions_.end();
+
+            if (size_)
+            {
+                results_.stack.resize(results_.stack.size() - size_);
+            }
+
+            results_.token_id = sm_._rules[results_.entry.param].first;
+            results_.entry = sm_._table[results_.stack.back() * sm_._columns +
+                results_.token_id];
+            break;
+        }
+        case go_to:
+            results_.stack.push_back(results_.entry.param);
+            results_.token_id = iter_->id;
+            results_.entry = sm_._table[results_.stack.back() * sm_._columns +
+                results_.token_id];
+            break;
+        }
+
+        if (results_.entry.action == accept)
+        {
+            const std::size_t size_ =
+                sm_._rules[results_.entry.param].second.size();
+
+            if (size_)
+            {
+                results_.stack.resize(results_.stack.size() - size_);
+            }
+
+            break;
+        }
+    }
+
+    accept_ = results_.entry.action == accept;
+    hit_ = curr_hit_ && accept_;
+    return accept_;
 }
 }
 }

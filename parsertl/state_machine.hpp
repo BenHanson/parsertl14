@@ -61,6 +61,11 @@ struct state_machine
         _columns = _rows = 0;
         _rules.clear();
     }
+
+    bool empty() const
+    {
+        return _table.empty();
+    }
 };
 }
 

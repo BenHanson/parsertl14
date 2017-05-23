@@ -74,7 +74,7 @@ struct match_results
         }
 
         return productions[productions.size() -
-            sm_._rules[entry.param].second.size() + index_];
+            production_size(sm_, entry.param) + index_];
     }
 
     std::size_t production_size(const state_machine &sm,

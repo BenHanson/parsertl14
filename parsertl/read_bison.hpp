@@ -179,7 +179,8 @@ void read_bison(const char *start_, const char *end_, rules &rules_)
                     const token &name_ =
                         results_.dollar(gsm_, 1, productions_);
 
-                    rules_.start(std::string(name_.first, name_.second).c_str());
+                    rules_.start(std::string(name_.first,
+                        name_.second).c_str());
                 }
                 else if (results_.entry.param == prod_index_)
                 {
