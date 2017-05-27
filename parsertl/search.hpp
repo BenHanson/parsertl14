@@ -19,7 +19,7 @@ namespace details
 template<typename iterator>
 void next(const state_machine &sm_, iterator &iter_, match_results &results_,
     const std::set<std::size_t> &productions_, iterator &last_eoi_,
-    typename state_machine::entry &entry_, bool &hit_);
+    match_results &last_results_, bool &hit_);
 template<typename iterator>
 bool parse(const state_machine &sm_, iterator &iter_, match_results &results_,
     const std::set<std::size_t> &productions_, bool &hit_);
@@ -33,7 +33,7 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
     bool hit_ = false;
     iterator curr_ = iter_;
     iterator last_eoi_;
-    typename state_machine::entry entry_;
+    match_results last_results_;
 
     end_ = iterator();
 
@@ -45,7 +45,7 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
             results_.entry.action != error)
         {
             details::next(sm_, curr_, results_, productions_, last_eoi_,
-                entry_, hit_);
+                last_results_, hit_);
         }
 
         if (results_.entry.action == accept)
@@ -58,10 +58,7 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
         {
             iterator eoi_;
 
-            results_.token_id = 0;
-            results_.entry = entry_;
-
-            if (details::parse(sm_, eoi_, results_, productions_, hit_))
+            if (details::parse(sm_, eoi_, last_results_, productions_, hit_))
             {
                 end_ = last_eoi_;
                 hit_ |= productions_.empty();
@@ -82,7 +79,7 @@ namespace details
 template<typename iterator>
 void next(const state_machine &sm_, iterator &iter_, match_results &results_,
     const std::set<std::size_t> &productions_, iterator &last_eoi_,
-    typename state_machine::entry &entry_, bool &hit_)
+    match_results &last_results_, bool &hit_)
 {
     switch (results_.entry.action)
     {
@@ -114,7 +111,9 @@ void next(const state_machine &sm_, iterator &iter_, match_results &results_,
         if (ptr_->action != error)
         {
             last_eoi_ = iter_;
-            entry_ = *ptr_;
+            last_results_.stack = results_.stack;
+            last_results_.token_id = 0;
+            last_results_.entry = *ptr_;
         }
 
         break;
