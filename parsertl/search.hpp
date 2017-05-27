@@ -65,9 +65,8 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
             {
                 end_ = last_eoi_;
                 hit_ |= productions_.empty();
+                break;
             }
-
-            break;
         }
 
         ++iter_;
