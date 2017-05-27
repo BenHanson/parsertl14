@@ -17,11 +17,12 @@ namespace parsertl
 namespace details
 {
 template<typename iterator>
-void next(const state_machine &sm_, const std::set<std::size_t> &productions_,
-    iterator &iter_, match_results &results_, iterator &last_eoi_, bool &hit_);
+void next(const state_machine &sm_, iterator &iter_, match_results &results_,
+    const std::set<std::size_t> &productions_, iterator &last_eoi_,
+    typename state_machine::entry &entry_, bool &hit_);
 template<typename iterator>
-bool parse(const state_machine &sm_, const std::set<std::size_t> &productions_,
-    iterator &iter_, match_results &results_, bool &hit_);
+bool parse(const state_machine &sm_, iterator &iter_, match_results &results_,
+    const std::set<std::size_t> &productions_, bool &hit_);
 }
 
 // Equivalent of std::search().
@@ -32,6 +33,7 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
     bool hit_ = false;
     iterator curr_ = iter_;
     iterator last_eoi_;
+    typename state_machine::entry entry_;
 
     end_ = iterator();
 
@@ -42,7 +44,8 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
         while (results_.entry.action != accept &&
             results_.entry.action != error)
         {
-            details::next(sm_, productions_, curr_, results_, last_eoi_, hit_);
+            details::next(sm_, curr_, results_, productions_, last_eoi_,
+                entry_, hit_);
         }
 
         if (results_.entry.action == accept)
@@ -53,16 +56,23 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
         }
         else if (last_eoi_->id != 0)
         {
-            end_ = last_eoi_;
-            hit_ |= productions_.empty();
+            iterator eoi_;
+
+            results_.token_id = 0;
+            results_.entry = entry_;
+
+            if (details::parse(sm_, eoi_, results_, productions_, hit_))
+            {
+                end_ = last_eoi_;
+                hit_ |= productions_.empty();
+            }
+
             break;
         }
-        else
-        {
-            ++iter_;
-            curr_ = iter_;
-            hit_ = false;
-        }
+
+        ++iter_;
+        curr_ = iter_;
+        hit_ = false;
     }
 
     return hit_;
@@ -71,8 +81,9 @@ bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
 namespace details
 {
 template<typename iterator>
-void next(const state_machine &sm_, const std::set<std::size_t> &productions_,
-    iterator &iter_, match_results &results_, iterator &last_eoi_, bool &hit_)
+void next(const state_machine &sm_, iterator &iter_, match_results &results_,
+    const std::set<std::size_t> &productions_, iterator &last_eoi_,
+    typename state_machine::entry &entry_, bool &hit_)
 {
     switch (results_.entry.action)
     {
@@ -101,18 +112,10 @@ void next(const state_machine &sm_, const std::set<std::size_t> &productions_,
             results_.entry = ptr_[results_.token_id];
         }
 
-        if (ptr_->action != accept && ptr_->action != error)
+        if (ptr_->action != error)
         {
-            match_results temp_ = results_;
-            iterator i_;
-
-            temp_.token_id = 0;
-            temp_.entry = *ptr_;
-
-            if (parse(sm_, productions_, i_, temp_, hit_))
-            {
-                last_eoi_ = iter_;
-            }
+            last_eoi_ = iter_;
+            entry_ = *ptr_;
         }
 
         break;
@@ -122,6 +125,9 @@ void next(const state_machine &sm_, const std::set<std::size_t> &productions_,
         const std::size_t size_ =
             sm_._rules[results_.entry.param].second.size();
         token<iterator> token_;
+
+        hit_ |= productions_.find(results_.entry.param) !=
+            productions_.end();
 
         if (size_)
         {
@@ -160,12 +166,9 @@ void next(const state_machine &sm_, const std::set<std::size_t> &productions_,
 }
 
 template<typename iterator>
-bool parse(const state_machine &sm_, const std::set<std::size_t> &productions_,
-    iterator &iter_, match_results &results_, bool &hit_)
+bool parse(const state_machine &sm_, iterator &iter_, match_results &results_,
+    const std::set<std::size_t> &productions_, bool &hit_)
 {
-    bool accept_ = false;
-    bool curr_hit_ = false;
-
     while (results_.entry.action != error)
     {
         switch (results_.entry.action)
@@ -199,7 +202,7 @@ bool parse(const state_machine &sm_, const std::set<std::size_t> &productions_,
             const std::size_t size_ =
                 sm_._rules[results_.entry.param].second.size();
 
-            curr_hit_ = productions_.find(results_.entry.param) !=
+            hit_ |= productions_.find(results_.entry.param) !=
                 productions_.end();
 
             if (size_)
@@ -234,9 +237,7 @@ bool parse(const state_machine &sm_, const std::set<std::size_t> &productions_,
         }
     }
 
-    accept_ = results_.entry.action == accept;
-    hit_ = curr_hit_ && accept_;
-    return accept_;
+    return results_.entry.action == accept;
 }
 }
 }

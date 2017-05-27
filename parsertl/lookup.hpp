@@ -45,7 +45,7 @@ void lookup(const state_machine &sm_, iterator &iter_, match_results &results_)
     {
         const std::size_t size_ =
             sm_._rules[results_.entry.param].second.size();
-        parsertl::token<iterator> token_;
+        token<iterator> token_;
 
         if (size_)
         {

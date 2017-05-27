@@ -16,7 +16,7 @@ namespace parsertl
 void read_bison(const char *start_, const char *end_, rules &rules_)
 {
     rules grules_;
-    parsertl::state_machine gsm_;
+    state_machine gsm_;
     lexertl::rules lrules_;
     lexertl::state_machine lsm_;
 
@@ -124,9 +124,9 @@ void read_bison(const char *start_, const char *end_, rules &rules_)
     lexertl::generator::build(lrules_, lsm_);
 
     lexertl::criterator iter_(start_, end_, lsm_);
-    using token = parsertl::token<lexertl::criterator>;
+    using token = token<lexertl::criterator>;
     typename token::token_vector productions_;
-    parsertl::match_results results_(iter_->id, gsm_);
+    match_results results_(iter_->id, gsm_);
 
     while (results_.entry.action != error &&
         results_.entry.action != accept)
@@ -195,7 +195,7 @@ void read_bison(const char *start_, const char *end_, rules &rules_)
                 break;
         }
 
-        parsertl::lookup(gsm_, iter_, results_, productions_);
+        lookup(gsm_, iter_, results_, productions_);
     }
 
     if (results_.entry.action == error)
