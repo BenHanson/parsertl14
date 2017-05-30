@@ -28,11 +28,12 @@ bool parse(const state_machine &sm_, iterator &iter_, match_results &results_,
 // Equivalent of std::search().
 template<typename iterator>
 bool search(const state_machine &sm_, iterator &iter_, iterator &end_,
-    match_results &results_, const std::set<std::size_t> &productions_)
+    const std::set<std::size_t> &productions_)
 {
     bool hit_ = false;
     iterator curr_ = iter_;
     iterator last_eoi_;
+    match_results results_;
     match_results last_results_;
 
     end_ = iterator();
