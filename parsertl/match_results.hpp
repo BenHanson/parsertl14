@@ -65,8 +65,21 @@ struct match_results
     }
 
     template<typename token_vector>
+    typename token_vector::value_type &dollar(const state_machine &sm_,
+        const std::size_t index_, token_vector &productions) const
+    {
+        if (entry.action != reduce)
+        {
+            throw runtime_error("Not in a reduce state!");
+        }
+
+        return productions[productions.size() -
+            production_size(sm_, entry.param) + index_];
+    }
+
+    template<typename token_vector>
     const typename token_vector::value_type &dollar(const state_machine &sm_,
-        const std::size_t index_, const token_vector &productions)
+        const std::size_t index_, const token_vector &productions) const
     {
         if (entry.action != reduce)
         {
@@ -78,7 +91,7 @@ struct match_results
     }
 
     std::size_t production_size(const state_machine &sm,
-        const std::size_t index_)
+        const std::size_t index_) const
     {
         return sm._rules[index_].second.size();
     }

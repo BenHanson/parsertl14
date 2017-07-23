@@ -24,7 +24,7 @@ void read_bison(const char *start_, const char *end_, rules &rules_)
     grules_.push("start", "list");
     grules_.push("list", "directives '%%' rules '%%'");
     grules_.push("directives", "%empty "
-        "| directives directive ");
+        "| directives directive");
 
     grules_.push("directive", "'%code' "
         "| '%define' "

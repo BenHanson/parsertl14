@@ -25,7 +25,7 @@ public:
         const production_vector &grammar_ = rules_.grammar();
         const token_info_vector &tokens_info_ = rules_.tokens_info();
         const std::size_t terminals_ = tokens_info_.size();
-            string_vector symbols_;
+        string_vector symbols_;
         std::set<std::size_t> seen_;
         token_map map_;
 
