@@ -141,7 +141,7 @@ public:
         rules_.push("CODE", "[}]", rules_.skip(), "<");
 
         rules_.push("INITIAL", "%empty", rules_.skip(), "EMPTY");
-        rules_.push("INITIAL", "%prec", rules_.skip(), "PREC");
+        rules_.push("INITIAL,EMPTY", "%prec", rules_.skip(), "PREC");
         rules_.push("PREC", "{LITERAL}|{SYMBOL}", PREC, "INITIAL");
         rules_.push("INITIAL,EMPTY", "[|]", OR, "INITIAL");
         rules_.push("INITIAL,CODE,EMPTY,PREC", "[/][*](.|\n)*?[*][/]|[/][/].*",
@@ -591,7 +591,6 @@ private:
                 const char_type *l_ = lhs_.c_str();
                 const char_type *r_ = rhs_.c_str();
 
-                assert(0);
                 ss_ << "Syntax error in rule '";
                 narrow(l_, ss_);
                 ss_ << "': '";
