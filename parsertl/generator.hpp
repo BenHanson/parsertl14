@@ -110,9 +110,9 @@ public:
             {
                 const production p_ = grammar_[pair_.first];
 
-                if (pair_.second < p_._rhs.size())
+                if (pair_.second < p_._rhs.first.size())
                 {
-                    const symbol &symbol_ = p_._rhs[pair_.second];
+                    const symbol &symbol_ = p_._rhs.first[pair_.second];
                     const std::size_t id_ = symbol_._type == symbol::TERMINAL ?
                         symbol_._id : terminals_ + symbol_._id;
                     typename size_t_vector::const_iterator sym_iter_ =
@@ -228,15 +228,15 @@ public:
 
                 std::size_t index_ = sidx_;
 
-                if (production_._rhs.empty())
+                if (production_._rhs.first.empty())
                 {
                     prod_._rhs_indexes.push_back(size_t_pair(sidx_, sidx_));
                 }
 
-                for (std::size_t ridx_ = 0, rsize_ = production_._rhs.size();
-                    ridx_ != rsize_; ++ridx_)
+                for (std::size_t ridx_ = 0, rsize_ = production_._rhs.
+                    first.size(); ridx_ != rsize_; ++ridx_)
                 {
-                    const symbol &symbol_ = production_._rhs[ridx_];
+                    const symbol &symbol_ = production_._rhs.first[ridx_];
                     const dfa_state &st_ = dfa_[index_];
 
                     prod_._rhs_indexes.push_back(size_t_pair(index_, 0));
@@ -522,7 +522,7 @@ private:
             {
                 const production &production_ = grammar_[c_.first];
 
-                if (production_._rhs.size() == c_.second)
+                if (production_._rhs.first.size() == c_.second)
                 {
                     char_vector follow_set_(terminals_, 0);
 
@@ -579,7 +579,7 @@ private:
 
             pair_.first = terminals_ + production_._lhs;
 
-            for (const symbol &symbol_ : production_._rhs)
+            for (const auto &symbol_ : production_._rhs.first)
             {
                 if (symbol_._type == symbol::TERMINAL)
                 {
@@ -638,12 +638,12 @@ private:
         {
             const size_t_pair pair_ = state_._closure[c_];
             const production *p_ = &grammar_[pair_.first];
-            const std::size_t rhs_size_ = p_->_rhs.size();
+            const std::size_t rhs_size_ = p_->_rhs.first.size();
 
             if (pair_.second < rhs_size_)
             {
                 // SHIFT
-                const symbol &symbol_ = p_->_rhs[pair_.second];
+                const symbol &symbol_ = p_->_rhs.first[pair_.second];
 
                 if (symbol_._type == symbol::NON_TERMINAL)
                 {
@@ -861,8 +861,8 @@ private:
             {
                 const production &production_ = grammar_[c_.first];
 
-                if (production_._rhs.size() > c_.second &&
-                    production_._rhs[c_.second]._id == id_)
+                if (production_._rhs.first.size() > c_.second &&
+                    production_._rhs.first[c_.second]._id == id_)
                 {
                     dump_production(production_, c_.second, terminals_,
                         symbols_, ss_);
@@ -882,8 +882,8 @@ private:
         const std::size_t dot_, const std::size_t terminals_,
         const string_vector &symbols_, std::ostringstream &ss_)
     {
-        auto sym_iter_ = production_._rhs.cbegin();
-        auto sym_end_ = production_._rhs.cend();
+        auto sym_iter_ = production_._rhs.first.cbegin();
+        auto sym_end_ = production_._rhs.first.cend();
         std::size_t index_ = 0;
 
         ss_ << " (";
