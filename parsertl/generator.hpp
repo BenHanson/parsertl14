@@ -46,14 +46,14 @@ public:
         }
     };
 
-    using prod_deque = std::deque<prod>;
+    using prod_vector = std::vector<prod>;
     using string = typename rules::string;
 
     static void build(rules &rules_, state_machine &sm_,
         std::string *warnings_ = 0)
     {
         dfa dfa_;
-        prod_deque new_grammar_;
+        prod_vector new_grammar_;
         std::size_t new_start_ = static_cast<std::size_t>(~0);
         rules new_rules_;
         nt_info_vector new_nt_info_;
@@ -100,7 +100,7 @@ public:
         {
             dfa_state &state_ = dfa_[s_];
             size_t_vector symbols_;
-            using item_sets = std::deque<size_t_pair_vector>;
+            using item_sets = std::vector<size_t_pair_vector>;
             item_sets item_sets_;
 
             state_._closure.assign(state_._basis.begin(), state_._basis.end());
@@ -155,7 +155,7 @@ public:
     }
 
     static void rewrite(const rules &rules_, dfa &dfa_,
-        prod_deque &new_grammar_, std::size_t &new_start_,
+        prod_vector &new_grammar_, std::size_t &new_start_,
         nt_info_vector &new_nt_info_)
     {
         using trie = std::pair<std::size_t, size_t_pair>;
@@ -290,7 +290,7 @@ public:
 
     // http://www.sqlite.org/src/artifact?ci=trunk&filename=tool/lemon.c
     // FindFirstSets()
-    static void build_first_sets(const prod_deque &grammar_,
+    static void build_first_sets(const prod_vector &grammar_,
         nt_info_vector &nt_info_)
     {
         bool progress_ = true;
@@ -364,7 +364,7 @@ public:
         } while (progress_);
     }
 
-    static void build_follow_sets(const prod_deque &grammar_,
+    static void build_follow_sets(const prod_vector &grammar_,
         nt_info_vector &nt_info_)
     {
         for (;;)
@@ -463,7 +463,6 @@ public:
 
 private:
     using char_type = typename rules::char_type;
-    using char_vector_deque = std::deque<char_vector>;
     using grammar = typename rules::production_vector;
     using ostringstream = std::basic_ostringstream<char_type>;
     using size_t_vector = std::vector<std::size_t>;
@@ -475,7 +474,7 @@ private:
     using token_info_vector = typename rules::token_info_vector;
 
     static void build_table(const rules &rules_, const dfa &dfa_,
-        const prod_deque &new_grammar_, const nt_info_vector &new_nt_info_,
+        const prod_vector &new_grammar_, const nt_info_vector &new_nt_info_,
         state_machine &sm_, std::string *warnings_)
     {
         const grammar &grammar_ = rules_.grammar();
@@ -740,8 +739,6 @@ private:
             typename token_info::associativity lhs_assoc_ =
                 token_info::token;
             std::size_t rhs_prec_ = 0;
-            typename token_info::associativity rhs_assoc_ =
-                token_info::token;
             const token_info *iter_ = &tokens_info_[id_];
 
             if (lhs_.action == shift)
@@ -757,7 +754,6 @@ private:
             if (rhs_.action == shift)
             {
                 rhs_prec_ = iter_->_precedence;
-                rhs_assoc_ = iter_->_associativity;
             }
             else if (rhs_.action == reduce)
             {
