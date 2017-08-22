@@ -462,12 +462,9 @@ public:
     }
 
 private:
-    using char_type = typename rules::char_type;
     using grammar = typename rules::production_vector;
-    using ostringstream = std::basic_ostringstream<char_type>;
     using size_t_vector = std::vector<std::size_t>;
     using hash_map = std::map<std::size_t, size_t_vector>;
-    using string_size_t_map = typename rules::string_size_t_map;
     using string_vector = typename rules::string_vector;
     using symbol = typename rules::symbol;
     using token_info = typename rules::token_info;

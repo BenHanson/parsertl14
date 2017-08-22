@@ -223,7 +223,6 @@ private:
     using string = std::basic_string<char_type>;
     using string_vector = typename rules::string_vector;
     using symbol = typename rules::symbol;
-    using symbol_vector = typename rules::symbol_vector;
     using token_prec_assoc =
         std::pair<std::size_t, typename rules::token_info::associativity>;
     using token_info = typename rules::token_info;
