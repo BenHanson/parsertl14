@@ -268,9 +268,9 @@ public:
         }
 
         // Validate start rule
-        if (start_ >= _nt_locations.size() ||
+/*        if (start_ >= _nt_locations.size() ||
             _grammar[_nt_locations[start_]._first_production].
-                _rhs.first.size() != 1)
+                _rhs.first.size() != 1)*/
         {
             static char_type accept_ [] =
                 { '$', 'a', 'c', 'c', 'e', 'p', 't', 0 };
@@ -281,7 +281,7 @@ public:
                 (symbol(symbol::TERMINAL, insert_terminal(string(1, '$'))));
             _start = accept_;
         }
-        else
+/*        else
         {
             _grammar[_nt_locations[start_]._first_production]._rhs.first.
                 push_back(symbol(symbol::TERMINAL,
@@ -303,7 +303,7 @@ public:
                     }
                 }
             }
-        }
+        }*/
 
         // Validate all non-terminals.
         for (std::size_t i_ = 0, size_ = _nt_locations.size();
