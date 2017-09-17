@@ -104,7 +104,7 @@ struct basic_match_results
     }
 };
 
-using match_results = basic_match_results<std::size_t>;
+using match_results = basic_match_results<uint16_t>;
 }
 
 #endif
