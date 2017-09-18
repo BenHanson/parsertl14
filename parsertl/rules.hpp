@@ -184,7 +184,7 @@ public:
         ++_next_precedence;
     }
 
-    std::size_t push(const char_type *lhs_, const char_type *rhs_)
+    id_type push(const char_type *lhs_, const char_type *rhs_)
     {
         const string lhs_str_ = lhs_;
 
@@ -201,7 +201,7 @@ public:
         }
 
         push_production(lhs_str_, rhs_);
-        return _grammar.size() - 1;
+        return static_cast<id_type>(_grammar.size() - 1);
     }
 
     id_type token_id(const char_type *name_) const
