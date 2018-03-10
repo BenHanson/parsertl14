@@ -114,6 +114,7 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
         }
 
         results_.reset(curr_->id, sm_);
+        last_results_.clear();
 
         while (results_.entry.action != accept &&
             results_.entry.action != error)
@@ -169,6 +170,7 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
         }
 
         results_.reset(curr_->id, sm_);
+        productions_.clear();
 
         while (results_.entry.action != accept &&
             results_.entry.action != error)
@@ -180,6 +182,9 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
 
         if (hit_)
         {
+            iterator again_(iter_->first, last_eoi_->first, iter_.sm());
+
+            details::parse(sm_, again_, prod_map_);
             end_ = curr_;
             break;
         }
