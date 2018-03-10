@@ -72,6 +72,7 @@ public:
         assert(static_cast<id_type>(sm_._columns - 1) == sm_._columns - 1);
         assert(static_cast<id_type>(sm_._rows - 1) == sm_._rows - 1);
         copy_rules(rules_, sm_);
+        sm_._captures = rules_.captures();
     }
 
     static void build_dfa(const rules &rules_, dfa &dfa_)

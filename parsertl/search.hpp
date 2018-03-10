@@ -36,6 +36,67 @@ bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
     const token_vector &productions_);
 }
 
+template<typename iterator, typename id_type, typename lsm>
+bool search(iterator first_, iterator second_,
+    const lsm &lsm_, const basic_state_machine<id_type> &gsm_)
+{
+    using lex_iterator = lexertl::iterator<iterator, lsm,
+        lexertl::match_results<iterator>>;
+    lex_iterator iter_(first_, second_, lsm_);
+    lex_iterator end_;
+
+    return search(gsm_, iter_, end_);
+}
+
+template<typename iterator, typename captures, typename id_type,
+    typename lsm>
+bool search(iterator first_, iterator second_, captures &captures_,
+        lsm &lsm_, const basic_state_machine<id_type> &gsm_)
+{
+    using lex_iterator = lexertl::iterator<iterator, lsm,
+        lexertl::match_results<iterator>>;
+    lex_iterator iter_(first_, second_, lsm_);
+    lex_iterator end_;
+    basic_match_results<id_type> results_(iter_->id, gsm_);
+    using token = parsertl::token<lex_iterator>;
+    using token_vector = typename token::token_vector;
+    std::multimap<id_type, token_vector> prod_map_;
+    bool success_ = search(gsm_, iter_, end_, &prod_map_);
+
+    captures_.clear();
+
+    if (success_)
+    {
+        captures_.resize(gsm_._captures.back().first +
+            gsm_._captures.back().second.size() + 1);
+        captures_[0].push_back(std::make_pair(iter_->first,
+            prod_map_.rbegin()->second.back().second));
+
+        for (const auto &pair_ : prod_map_)
+        {
+            const auto &row_ = gsm_._captures[pair_.first];
+
+            if (!row_.second.empty())
+            {
+                std::size_t index_ = 0;
+
+                for (const auto &token_ : row_.second)
+                {
+                    const auto &token1_ = pair_.second[token_.first];
+                    const auto &token2_ = pair_.second[token_.second];
+                    auto &entry_ = captures_[row_.first + index_ + 1];
+
+                    entry_.push_back(std::make_pair(token1_.first,
+                        token2_.second));
+                    ++index_;
+                }
+            }
+        }
+    }
+
+    return success_;
+}
+
 // Equivalent of std::search().
 template<typename id_type, typename iterator>
 bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,

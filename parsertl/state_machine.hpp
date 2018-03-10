@@ -43,6 +43,8 @@ struct basic_state_machine
         }
     };
 
+    using capture_vector = std::vector<std::pair<id_type, id_type>>;
+    using captures_vector = std::vector<std::pair<std::size_t, capture_vector>>;
     using table = std::vector<entry>;
     using id_type_vector = std::vector<id_type>;
     using id_type_pair = std::pair<id_type, id_type_vector>;
@@ -52,6 +54,7 @@ struct basic_state_machine
     std::size_t _columns;
     std::size_t _rows;
     rules _rules;
+    captures_vector _captures;
 
     basic_state_machine() :
         _columns(0),
