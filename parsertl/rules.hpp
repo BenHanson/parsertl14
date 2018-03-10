@@ -527,6 +527,8 @@ private:
         lexer_iterator end_;
         id_type last_id_ = 0;
         int brackets_ = 0;
+        int curr_bracket_ = 0;
+        std::stack<int> bracket_stack_;
         std::size_t count_ = 0;
 
         if (location_._first_production == npos())
@@ -638,9 +640,12 @@ private:
                 if (_captures.size() <= _grammar.size())
                 {
                     _captures.resize(_grammar.size() + 1);
+                    curr_bracket_ = 0;
                 }
 
                 ++brackets_;
+                ++curr_bracket_;
+                bracket_stack_.push(curr_bracket_);
                 _captures.back().second.push_back(std::
                     make_pair(static_cast<id_type>(production_.
                         _rhs.first.size()), 0));
@@ -668,8 +673,9 @@ private:
                     throw runtime_error(ss_.str());
                 }
 
-                _captures.back().second[brackets_].second =
+                _captures.back().second[bracket_stack_.top() - 1].second =
                     static_cast<id_type>(production_._rhs.first.size() - 1);
+                bracket_stack_.pop();
                 break;
             default:
             {
