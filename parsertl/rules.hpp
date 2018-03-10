@@ -215,7 +215,7 @@ public:
                 i_ < size_; ++i_)
             {
                 _captures[i_ + 1].first = _captures[i_].first +
-                    _captures[i_ + 1].second.size();
+                    _captures[i_].second.size();
             }
         }
 
