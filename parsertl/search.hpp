@@ -22,18 +22,14 @@ void next(const basic_state_machine<id_type> &sm_, iterator &iter_,
     iterator &last_eoi_, basic_match_results<id_type> &last_results_);
 template<typename id_type, typename iterator, typename token_vector>
 void next(const basic_state_machine<id_type> &sm_, iterator &iter_,
-    basic_match_results<id_type> &results_,
-    std::multimap<id_type, token_vector> *prod_map_, iterator &last_eoi_,
-    basic_match_results<id_type> &last_results_,
-    token_vector &productions_, token_vector &last_productions_);
+    basic_match_results<id_type> &results_, iterator &last_eoi_,
+    token_vector &productions_);
 template<typename id_type, typename iterator>
 bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
     basic_match_results<id_type> &results_, std::set<id_type> *prod_set_);
 template<typename id_type, typename iterator, typename token_vector>
 bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
-    basic_match_results<id_type> &results_,
-    std::multimap<id_type, token_vector> *prod_map_,
-    const token_vector &productions_);
+    std::multimap<id_type, token_vector> *prod_map_);
 }
 
 template<typename iterator, typename id_type, typename lsm>
@@ -162,8 +158,6 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
     iterator last_eoi_;
     basic_match_results<id_type> results_;
     token_vector productions_;
-    basic_match_results<id_type> last_results_;
-    token_vector last_productions_;
 
     end_ = iterator();
 
@@ -179,8 +173,7 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
         while (results_.entry.action != accept &&
             results_.entry.action != error)
         {
-            details::next(sm_, curr_, results_, prod_map_, last_eoi_,
-                last_results_, productions_, last_productions_);
+            details::next(sm_, curr_, results_, last_eoi_, productions_);
         }
 
         hit_ = results_.entry.action == accept;
@@ -192,10 +185,9 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
         }
         else if (last_eoi_->id != 0)
         {
-            iterator eoi_;
+            iterator again_(iter_->first, last_eoi_->first, iter_.sm());
 
-            hit_ = details::parse(sm_, eoi_, last_results_, prod_map_,
-                last_productions_);
+            hit_ = details::parse(sm_, again_, prod_map_);
 
             if (hit_)
             {
@@ -304,10 +296,8 @@ void next(const basic_state_machine<id_type> &sm_, iterator &iter_,
 
 template<typename id_type, typename iterator, typename token_vector>
 void next(const basic_state_machine<id_type> &sm_, iterator &iter_,
-    basic_match_results<id_type> &results_,
-    std::multimap<id_type, token_vector> *prod_map_,
-    iterator &last_eoi_, basic_match_results<id_type> &last_results_,
-    token_vector &productions_, token_vector &last_productions_)
+    basic_match_results<id_type> &results_, iterator &last_eoi_,
+    token_vector &productions_)
 {
     switch (results_.entry.action)
     {
@@ -341,10 +331,6 @@ void next(const basic_state_machine<id_type> &sm_, iterator &iter_,
         if (ptr_->action != error)
         {
             last_eoi_ = iter_;
-            last_results_.stack = results_.stack;
-            last_results_.token_id = 0;
-            last_results_.entry = *ptr_;
-            last_productions_ = productions_;
         }
 
         break;
@@ -354,12 +340,6 @@ void next(const basic_state_machine<id_type> &sm_, iterator &iter_,
         const std::size_t size_ =
             sm_._rules[results_.entry.param].second.size();
         token<iterator> token_;
-
-        if (prod_map_)
-        {
-            prod_map_->insert(std::make_pair(results_.entry.param,
-                token_vector(productions_.end() - size_, productions_.end())));
-        }
 
         if (size_)
         {
@@ -480,10 +460,11 @@ bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
 
 template<typename id_type, typename iterator, typename token_vector>
 bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
-    basic_match_results<id_type> &results_,
-    std::multimap<id_type, token_vector> *prod_map_,
-    const token_vector &productions_)
+    std::multimap<id_type, token_vector> *prod_map_)
 {
+    token_vector productions_;
+    basic_match_results<id_type> results_(iter_->id, sm_);
+
     while (results_.entry.action != error)
     {
         switch (results_.entry.action)
@@ -492,6 +473,8 @@ bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
             break;
         case shift:
             results_.stack.push_back(results_.entry.param);
+            productions_.push_back(typename token_vector::value_type(iter_->id,
+                iter_->first, iter_->second));
 
             if (results_.token_id != 0)
             {
@@ -516,6 +499,7 @@ bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
         {
             const std::size_t size_ =
                 sm_._rules[results_.entry.param].second.size();
+            token<iterator> token_;
 
             if (prod_map_)
             {
@@ -526,12 +510,16 @@ bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
 
             if (size_)
             {
+                token_.first = (productions_.end() - size_)->first;
+                token_.second = productions_.back().second;
                 results_.stack.resize(results_.stack.size() - size_);
+                productions_.resize(productions_.size() - size_);
             }
 
             results_.token_id = sm_._rules[results_.entry.param].first;
             results_.entry = sm_._table[results_.stack.back() * sm_._columns +
                 results_.token_id];
+            productions_.push_back(token_);
             break;
         }
         case go_to:
