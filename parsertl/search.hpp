@@ -29,6 +29,7 @@ bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
     basic_match_results<id_type> &results_, std::set<id_type> *prod_set_);
 template<typename id_type, typename iterator, typename token_vector>
 bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
+    basic_match_results<id_type> &results_, token_vector &productions_,
     std::multimap<id_type, token_vector> *prod_map_);
 }
 
@@ -101,6 +102,7 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
     bool hit_ = false;
     iterator curr_ = iter_;
     iterator last_eoi_;
+    // results_ defined here so that allocated memory can be reused.
     basic_match_results<id_type> results_;
     basic_match_results<id_type> last_results_;
 
@@ -157,6 +159,8 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
     bool hit_ = false;
     iterator curr_ = iter_;
     iterator last_eoi_;
+    // results_ and productions_ defined here so that
+    // allocated memory can be reused.
     basic_match_results<id_type> results_;
     token_vector productions_;
 
@@ -182,9 +186,15 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
 
         if (hit_)
         {
-            iterator again_(iter_->first, last_eoi_->first, iter_.sm());
+            if (prod_map_)
+            {
+                iterator again_(iter_->first, last_eoi_->first, iter_.sm());
 
-            details::parse(sm_, again_, prod_map_);
+                results_.reset(iter_->id, sm_);
+                productions_.clear();
+                details::parse(sm_, again_, results_, productions_, prod_map_);
+            }
+
             end_ = curr_;
             break;
         }
@@ -192,7 +202,10 @@ bool search(const basic_state_machine<id_type> &sm_, iterator &iter_,
         {
             iterator again_(iter_->first, last_eoi_->first, iter_.sm());
 
-            hit_ = details::parse(sm_, again_, prod_map_);
+            results_.reset(iter_->id, sm_);
+            productions_.clear();
+            hit_ = details::parse(sm_, again_, results_, productions_,
+                prod_map_);
 
             if (hit_)
             {
@@ -465,11 +478,9 @@ bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
 
 template<typename id_type, typename iterator, typename token_vector>
 bool parse(const basic_state_machine<id_type> &sm_, iterator &iter_,
+    basic_match_results<id_type> &results_, token_vector &productions_,
     std::multimap<id_type, token_vector> *prod_map_)
 {
-    token_vector productions_;
-    basic_match_results<id_type> results_(iter_->id, sm_);
-
     while (results_.entry.action != error)
     {
         switch (results_.entry.action)
