@@ -64,10 +64,11 @@ bool search(iterator first_, iterator second_, captures &captures_,
 
     if (success_)
     {
+        iterator last_ = iter_->first;
+
         captures_.resize(gsm_._captures.back().first +
             gsm_._captures.back().second.size() + 1);
-        captures_[0].push_back(std::make_pair(iter_->first,
-            prod_map_.rbegin()->second.back().second));
+        captures_[0].push_back(std::make_pair(iter_->first, iter_->first));
 
         for (const auto &pair_ : prod_map_)
         {
@@ -86,9 +87,16 @@ bool search(iterator first_, iterator second_, captures &captures_,
                     entry_.push_back(std::make_pair(token1_.first,
                         token2_.second));
                     ++index_;
+
+                    if (last_ < token2_.second)
+                    {
+                        last_ = token2_.second;
+                    }
                 }
             }
         }
+
+        captures_.front().back().second = last_;
     }
 
     return success_;
