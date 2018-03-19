@@ -90,27 +90,19 @@ bool search(iterator first_, iterator second_, captures &captures_,
                         entry_.push_back(std::make_pair(token1_.first,
                             token2_.second));
                         ++index_;
-
-                        if (last_ < token2_.second)
-                        {
-                            last_ = token2_.second;
-                        }
                     }
                 }
             }
         }
 
-        if (last_ == iter_->first)
+        for (const auto &pair_ : prod_map_)
         {
-            for (const auto &pair_ : prod_map_)
-            {
-                typename token::iter_type second_ =
-                    pair_.second.back().second;
+            typename token::iter_type second_ =
+                pair_.second.back().second;
 
-                if (second_ > last_)
-                {
-                    last_ = second_;
-                }
+            if (second_ > last_)
+            {
+                last_ = second_;
             }
         }
 
