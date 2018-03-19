@@ -48,7 +48,7 @@ bool search(iterator first_, iterator second_,
 template<typename iterator, typename captures, typename id_type,
     typename lsm>
 bool search(iterator first_, iterator second_, captures &captures_,
-        lsm &lsm_, const basic_state_machine<id_type> &gsm_)
+    lsm &lsm_, const basic_state_machine<id_type> &gsm_)
 {
     using lex_iterator = lexertl::iterator<iterator, lsm,
         lexertl::match_results<iterator>>;
@@ -66,32 +66,50 @@ bool search(iterator first_, iterator second_, captures &captures_,
     {
         iterator last_ = iter_->first;
 
-        captures_.resize(gsm_._captures.back().first +
-            gsm_._captures.back().second.size() + 1);
+        captures_.resize((gsm_._captures.empty() ? 0 :
+            gsm_._captures.back().first +
+            gsm_._captures.back().second.size()) + 1);
         captures_[0].push_back(std::make_pair(iter_->first, iter_->first));
 
         for (const auto &pair_ : prod_map_)
         {
-            const auto &row_ = gsm_._captures[pair_.first];
-
-            if (!row_.second.empty())
+            if (gsm_._captures.size() > pair_.first)
             {
-                std::size_t index_ = 0;
+                const auto &row_ = gsm_._captures[pair_.first];
 
-                for (const auto &token_ : row_.second)
+                if (!row_.second.empty())
                 {
-                    const auto &token1_ = pair_.second[token_.first];
-                    const auto &token2_ = pair_.second[token_.second];
-                    auto &entry_ = captures_[row_.first + index_ + 1];
+                    std::size_t index_ = 0;
 
-                    entry_.push_back(std::make_pair(token1_.first,
-                        token2_.second));
-                    ++index_;
-
-                    if (last_ < token2_.second)
+                    for (const auto &token_ : row_.second)
                     {
-                        last_ = token2_.second;
+                        const auto &token1_ = pair_.second[token_.first];
+                        const auto &token2_ = pair_.second[token_.second];
+                        auto &entry_ = captures_[row_.first + index_ + 1];
+
+                        entry_.push_back(std::make_pair(token1_.first,
+                            token2_.second));
+                        ++index_;
+
+                        if (last_ < token2_.second)
+                        {
+                            last_ = token2_.second;
+                        }
                     }
+                }
+            }
+        }
+
+        if (last_ == iter_->first)
+        {
+            for (const auto &pair_ : prod_map_)
+            {
+                typename token::iter_type second_ =
+                    pair_.second.back().second;
+
+                if (second_ > last_)
+                {
+                    last_ = second_;
                 }
             }
         }

@@ -211,6 +211,11 @@ public:
 
         if (!_captures.empty() && old_size_ != _grammar.size())
         {
+            if (_captures.size() < _grammar.size())
+            {
+                _captures.resize(_grammar.size());
+            }
+
             for (std::size_t i_ = old_size_, size_ = _grammar.size() - 1;
                 i_ < size_; ++i_)
             {
