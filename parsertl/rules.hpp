@@ -211,17 +211,7 @@ public:
 
         if (!_captures.empty() && old_size_ != _grammar.size())
         {
-            if (_captures.size() < _grammar.size())
-            {
-                _captures.resize(_grammar.size());
-            }
-
-            for (std::size_t i_ = old_size_, size_ = _grammar.size() - 1;
-                i_ < size_; ++i_)
-            {
-                _captures[i_ + 1].first = _captures[i_].first +
-                    _captures[i_].second.size();
-            }
+            resize_captures();
         }
 
         return static_cast<id_type>(_grammar.size() - 1);
@@ -644,7 +634,7 @@ private:
             case OPEN_PAREN:
                 if (_captures.size() <= _grammar.size())
                 {
-                    _captures.resize(_grammar.size() + 1);
+                    resize_captures();
                     curr_bracket_ = 0;
                 }
 
@@ -712,6 +702,23 @@ private:
         }
 
         _grammar.push_back(production_);
+    }
+
+    void resize_captures()
+    {
+        const std::size_t old_size_ = _captures.size();
+
+        _captures.resize(_grammar.size() + 1);
+
+        if (old_size_ > 0)
+        {
+            for (std::size_t i_ = old_size_ - 1, size_ = _captures.size() - 1;
+                i_ < size_; ++i_)
+            {
+                _captures[i_ + 1].first = _captures[i_].first +
+                    _captures[i_].second.size();
+            }
+        }
     }
 
     nt_location &location(const std::size_t id_)
