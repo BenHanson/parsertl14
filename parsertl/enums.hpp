@@ -8,6 +8,7 @@
 
 namespace parsertl
 {
+enum rule_flags { enable_captures = 1 };
 enum eaction
 {
     error,

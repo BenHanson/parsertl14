@@ -12,9 +12,10 @@
 
 namespace parsertl
 {
-template<typename id_type>
+template<typename id_ty>
 struct basic_state_machine
 {
+    using id_type = id_ty;
     // If you get a compile error here you have
     // failed to define an unsigned id type.
     static_assert(std::is_unsigned<id_type>::value, "Your id type is signed");

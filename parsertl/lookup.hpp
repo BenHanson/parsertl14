@@ -12,9 +12,9 @@
 namespace parsertl
 {
 // parse sequence but do not keep track of productions
-template<typename id_type, typename iterator>
-void lookup(const basic_state_machine<id_type> &sm_, iterator &iter_,
-    basic_match_results<id_type> &results_)
+template<typename sm_type, typename iterator>
+void lookup(const sm_type &sm_, iterator &iter_,
+    basic_match_results<sm_type> &results_)
 {
     switch (results_.entry.action)
     {
@@ -82,9 +82,9 @@ void lookup(const basic_state_machine<id_type> &sm_, iterator &iter_,
 }
 
 // Parse sequence and maintain production vector
-template<typename id_type, typename iterator, typename token_vector>
-void lookup(const basic_state_machine<id_type> &sm_, iterator &iter_,
-    basic_match_results<id_type> &results_, token_vector &productions_)
+template<typename sm_type, typename iterator, typename token_vector>
+void lookup(const sm_type &sm_, iterator &iter_,
+    basic_match_results<sm_type> &results_, token_vector &productions_)
 {
     switch (results_.entry.action)
     {
