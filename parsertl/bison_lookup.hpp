@@ -179,7 +179,14 @@ void bison_lookup(iterator &iter_, match_results &results_,
         }
         else
         {
-            token_.first = token_.second = iter_->first;
+            if (productions_.empty())
+            {
+                token_.first = token_.second = iter_->first;
+            }
+            else
+            {
+                token_.first = token_.second = productions_.back().second;
+            }
         }
 
         results_.token_id = tables_.yyr1[results_.entry.param];

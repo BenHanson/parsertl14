@@ -132,7 +132,14 @@ void lookup(const sm_type &sm_, iterator &iter_,
         }
         else
         {
-            token_.first = token_.second = iter_->first;
+            if (productions_.empty())
+            {
+                token_.first = token_.second = iter_->first;
+            }
+            else
+            {
+                token_.first = token_.second = productions_.back().second;
+            }
         }
 
         results_.token_id = sm_._rules[results_.entry.param].first;
