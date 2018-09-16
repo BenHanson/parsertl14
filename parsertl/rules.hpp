@@ -367,7 +367,7 @@ public:
 
                         ++counter_;
                         ss_ << counter_;
-                        pair_.first = lhs_ + '_' + ss_.str();
+                        pair_.first = lhs_ + char_type('_') + ss_.str();
                         _generated_rules.insert(pair_.first);
                         pair_.second = empty_or_ + rhs_stack_.top();
                         rhs_stack_.top() = pair_.first;
@@ -385,10 +385,10 @@ public:
 
                         ++counter_;
                         ss_ << counter_;
-                        pair_.first = lhs_ + '_' + ss_.str();
+                        pair_.first = lhs_ + char_type('_') + ss_.str();
                         _generated_rules.insert(pair_.first);
-                        pair_.second = empty_or_ + pair_.first + ' ' +
-                            rhs_stack_.top();
+                        pair_.second = empty_or_ + pair_.first +
+                            char_type(' ') + rhs_stack_.top();
                         rhs_stack_.top() = pair_.first;
                         new_rules_.push(pair_);
                         break;
@@ -404,10 +404,10 @@ public:
 
                         ++counter_;
                         ss_ << counter_;
-                        pair_.first = lhs_ + '_' + ss_.str();
+                        pair_.first = lhs_ + char_type('_') + ss_.str();
                         _generated_rules.insert(pair_.first);
                         pair_.second = rhs_stack_.top() + or_ +
-                            pair_.first + ' ' + rhs_stack_.top();
+                            pair_.first + char_type(' ') + rhs_stack_.top();
                         rhs_stack_.top() = pair_.first;
                         new_rules_.push(pair_);
                         break;
@@ -421,7 +421,7 @@ public:
 
                         ++counter_;
                         ss_ << counter_;
-                        pair_.first = lhs_ + '_' + ss_.str();
+                        pair_.first = lhs_ + char_type('_') + ss_.str();
                         _generated_rules.insert(pair_.first);
                         pair_.second = rhs_stack_.top();
 
