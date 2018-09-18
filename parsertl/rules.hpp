@@ -267,7 +267,7 @@ public:
 
             ss_ << "Rule ";
             narrow(lhs_.c_str(), ss_);
-            ss_ << " is already defined as a generated rules.";
+            ss_ << " is already defined as a generated rule.";
             throw runtime_error(ss_.str());
         }
 
