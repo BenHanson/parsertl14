@@ -534,6 +534,7 @@ public:
 
         std::size_t start_ = npos();
 
+        // Determine id of start rule
         if (_start.empty())
         {
             const std::size_t id_ = _grammar[0]._lhs;
@@ -555,6 +556,41 @@ public:
         if (start_ == npos())
         {
             throw runtime_error("Specified start rule does not exist.");
+        }
+
+        // Look for unused rules
+        for (const auto &pair_ : _non_terminals)
+        {
+            bool found_ = false;
+
+            // Skip start_
+            if (pair_.second == start_) continue;
+
+            for (const auto &prod_ : _grammar)
+            {
+                for (const auto &symbol_ : prod_._rhs.first)
+                {
+                    if (symbol_._type == symbol::NON_TERMINAL &&
+                        symbol_._id == pair_.second)
+                    {
+                        found_ = true;
+                        break;
+                    }
+                }
+
+                if (found_) break;
+            }
+
+            if (!found_)
+            {
+                std::ostringstream ss_;
+                const string name_ = pair_.first;
+
+                ss_ << '\'';
+                narrow(name_.c_str(), ss_);
+                ss_ << "' is an unused rule.";
+                throw runtime_error(ss_.str());
+            }
         }
 
         // Validate start rule
