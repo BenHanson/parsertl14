@@ -15,7 +15,7 @@ template<typename tables_struct, typename iterator, typename results>
 void bison_next(const tables_struct &tables_, iterator &iter_,
     results &results_)
 {
-    if (iter_->id == ~0)
+    if (iter_->id == iter_->npos())
     {
         results_.entry.action = error;
         results_.entry.param = unknown_token;

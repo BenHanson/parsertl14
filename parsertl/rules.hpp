@@ -737,7 +737,7 @@ private:
         typename lexertl::basic_generator<lexer_rules, lexer_state_machine>;
     using lexer_iterator =
         typename lexertl::iterator<const char_type *, lexer_state_machine,
-        typename lexertl::recursive_match_results<const char_type *>>;
+        typename lexertl::match_results<const char_type *>>;
 
     std::size_t _flags;
     ebnf_tables _ebnf_tables;
