@@ -72,18 +72,24 @@ public:
     };
 
     using symbol_vector = std::vector<symbol>;
+    enum associativity
+    {
+        token_assoc, precedence_assoc, nonassoc_assoc, left_assoc, right_assoc
+    };
 
     struct production
     {
         std::size_t _lhs;
         std::pair<symbol_vector, string> _rhs;
         std::size_t _precedence;
+        associativity _associativity;
         std::size_t _index;
         std::size_t _next_lhs;
 
         production(const std::size_t index_) :
             _lhs(static_cast<std::size_t>(~0)),
             _precedence(0),
+            _associativity(token_assoc),
             _index(index_),
             _next_lhs(static_cast<std::size_t>(~0))
         {
@@ -95,6 +101,7 @@ public:
             _rhs.first.clear();
             _rhs.second.clear();
             _precedence = 0;
+            _associativity = token_assoc;
             _index = static_cast<std::size_t>(~0);
             _next_lhs = static_cast<std::size_t>(~0);
         }
@@ -104,13 +111,12 @@ public:
 
     struct token_info
     {
-        enum associativity { token, precedence, nonassoc, left, right };
         std::size_t _precedence;
         associativity _associativity;
 
         token_info() :
             _precedence(0),
-            _associativity(token)
+            _associativity(token_assoc)
         {
         }
 
@@ -164,7 +170,7 @@ public:
     {
         lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-        token(iter_, 0, token_info::token, "token");
+        token(iter_, 0, token_assoc, "token");
     }
 
     void token(const string &names_)
@@ -172,14 +178,14 @@ public:
         lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
             _token_lexer);
 
-        token(iter_, 0, token_info::token, "token");
+        token(iter_, 0, token_assoc, "token");
     }
 
     void left(const char_type *names_)
     {
         lexer_iterator iter_(names_, str_end(names_), _token_lexer);
         
-        token(iter_, _next_precedence, token_info::left, "left");
+        token(iter_, _next_precedence, left_assoc, "left");
         ++_next_precedence;
     }
 
@@ -188,7 +194,7 @@ public:
         lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
             _token_lexer);
 
-        token(iter_, _next_precedence, token_info::left, "left");
+        token(iter_, _next_precedence, left_assoc, "left");
         ++_next_precedence;
     }
 
@@ -196,7 +202,7 @@ public:
     {
         lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-        token(iter_, _next_precedence, token_info::right, "right");
+        token(iter_, _next_precedence, right_assoc, "right");
         ++_next_precedence;
     }
 
@@ -205,7 +211,7 @@ public:
         lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
             _token_lexer);
 
-        token(iter_, _next_precedence, token_info::right, "right");
+        token(iter_, _next_precedence, right_assoc, "right");
         ++_next_precedence;
     }
 
@@ -213,7 +219,7 @@ public:
     {
         lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-        token(iter_, _next_precedence, token_info::nonassoc, "nonassoc");
+        token(iter_, _next_precedence, nonassoc_assoc, "nonassoc");
         ++_next_precedence;
     }
 
@@ -222,7 +228,7 @@ public:
         lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
             _token_lexer);
 
-        token(iter_, _next_precedence, token_info::nonassoc, "nonassoc");
+        token(iter_, _next_precedence, nonassoc_assoc, "nonassoc");
         ++_next_precedence;
     }
 
@@ -230,7 +236,7 @@ public:
     {
         lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-        token(iter_, _next_precedence, token_info::precedence, "precedence");
+        token(iter_, _next_precedence, precedence_assoc, "precedence");
         ++_next_precedence;
     }
 
@@ -239,7 +245,7 @@ public:
         lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
             _token_lexer);
 
-        token(iter_, _next_precedence, token_info::precedence, "precedence");
+        token(iter_, _next_precedence, precedence_assoc, "precedence");
         ++_next_precedence;
     }
 
@@ -315,6 +321,10 @@ public:
 
                         break;
                     }
+                    case ebnf_indexes::opt_list_1_idx:
+                        // opt_list: ;
+                        rhs_stack_.push(string());
+                        break;
                     case ebnf_indexes::opt_list_3_idx:
                     {
                         // opt_list: rhs_list opt_prec;
@@ -343,10 +353,6 @@ public:
                         rhs_stack_.top() += char_type(' ') + r_;
                         break;
                     }
-                    case ebnf_indexes::opt_list_1_idx:
-                        // opt_list: ;
-                        rhs_stack_.push(string());
-                        break;
                     case ebnf_indexes::opt_list_2_idx:
                     case ebnf_indexes::identifier_idx:
                     case ebnf_indexes::terminal_idx:
@@ -783,8 +789,7 @@ private:
     }
 
     void token(lexer_iterator &iter_, const std::size_t precedence_,
-        const typename token_info::associativity associativity_,
-        const char *func_)
+        const associativity associativity_, const char *func_)
     {
         lexer_iterator end_;
         string token_;
@@ -969,7 +974,14 @@ private:
                             const std::size_t id_ = terminal_iter_->second;
                             token_info &token_info_ = info(id_);
 
-                            production_._precedence = token_info_._precedence;
+                            if (token_info_._precedence)
+                            {
+                                production_._precedence =
+                                    token_info_._precedence;
+                                production_._associativity =
+                                    token_info_._associativity;
+                            }
+
                             production_._rhs.first.
                                 push_back(symbol(symbol::TERMINAL, id_));
                         }
@@ -986,7 +998,13 @@ private:
                         const std::size_t id_ = insert_terminal(token_);
                         token_info &token_info_ = info(id_);
 
-                        production_._precedence = token_info_._precedence;
+                        if (token_info_._precedence)
+                        {
+                            production_._precedence = token_info_._precedence;
+                            production_._associativity =
+                                token_info_._associativity;
+                        }
+
                         production_._rhs.first.push_back(symbol(symbol::
                             TERMINAL, id_));
                         break;
@@ -1001,8 +1019,12 @@ private:
                         const std::size_t idx_ = productions_.size() - size_;
                         const string token_ = productions_[idx_ + 1].str();
                         const id_type id_ = token_id(token_);
+                        token_info &token_info_ = info(id_);
 
-                        production_._precedence = info(id_)._precedence;
+                        // Explicit %prec, so no conditional
+                        production_._precedence = token_info_._precedence;
+                        production_._associativity =
+                            token_info_._associativity;
                         production_._rhs.second = token_;
                         break;
                     }
