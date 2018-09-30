@@ -439,7 +439,8 @@ public:
 
                         if (_flags & enable_captures)
                         {
-                            rhs_stack_.top() = '(' + pair_.first + ')';
+                            rhs_stack_.top() = char_type('(') + pair_.first +
+                                char_type(')');
                         }
                         else
                         {
