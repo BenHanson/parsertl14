@@ -74,7 +74,7 @@ public:
     using symbol_vector = std::vector<symbol>;
     enum associativity
     {
-        token_assoc, precedence_assoc, nonassoc_assoc, left_assoc, right_assoc
+        token_assoc, precedence_assoc, non_assoc, left_assoc, right_assoc
     };
 
     struct production
@@ -219,7 +219,7 @@ public:
     {
         lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-        token(iter_, _next_precedence, nonassoc_assoc, "nonassoc");
+        token(iter_, _next_precedence, non_assoc, "nonassoc");
         ++_next_precedence;
     }
 
@@ -228,7 +228,7 @@ public:
         lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
             _token_lexer);
 
-        token(iter_, _next_precedence, nonassoc_assoc, "nonassoc");
+        token(iter_, _next_precedence, non_assoc, "nonassoc");
         ++_next_precedence;
     }
 

@@ -55,19 +55,19 @@ public:
         {
             switch (pair_.first.second)
             {
-            case rules::token_info::token:
+            case rules::token_assoc:
                 token(stream_);
                 break;
-            case rules::token_info::precedence:
+            case rules::precedence_assoc:
                 precedence(stream_);
                 break;
-            case rules::token_info::nonassoc:
+            case rules::non_assoc:
                 nonassoc(stream_);
                 break;
-            case rules::token_info::left:
+            case rules::left_assoc:
                 left(stream_);
                 break;
-            case rules::token_info::right:
+            case rules::right_assoc:
                 right(stream_);
                 break;
             }
@@ -224,7 +224,7 @@ private:
     using string_vector = typename rules::string_vector;
     using symbol = typename rules::symbol;
     using token_prec_assoc =
-        std::pair<std::size_t, typename rules::token_info::associativity>;
+        std::pair<std::size_t, typename rules::associativity>;
     using token_info = typename rules::token_info;
     using token_info_vector = typename rules::token_info_vector;
     using token_map = std::map<token_prec_assoc, string>;
