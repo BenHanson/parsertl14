@@ -8,9 +8,9 @@ As well as normal parsing, it is now possible to use the library as a more power
 ### Match a string with captures
 
 ```cpp
-#include "parsertl/generator.hpp"
+#include <parsertl/generator.hpp>
 #include <iostream>
-#include "parsertl/match.hpp"
+#include <parsertl/match.hpp>
 
 int main()
 {
