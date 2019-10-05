@@ -166,6 +166,32 @@ public:
         info(id_);
     }
 
+    void clear()
+    {
+        _flags = 0;
+        _next_precedence = 1;
+
+        _non_terminals.clear();
+        _nt_locations.clear();
+        _new_rule_ids.clear();
+        _generated_rules.clear();
+        _start.clear();
+        _grammar.clear();
+        _captures.clear();
+
+        _terminals.clear();
+        _tokens_info.clear();
+
+        const std::size_t id_ = insert_terminal(string(1, '$'));
+
+        info(id_);
+    }
+
+    void flags(const std::size_t flags_)
+    {
+        _flags = flags_;
+    }
+
     void token(const char_type *names_)
     {
         lexer_iterator iter_(names_, str_end(names_), _token_lexer);
@@ -510,9 +536,9 @@ public:
         {
             std::ostringstream ss_;
 
-            ss_ << "Unknown token '";
+            ss_ << "Unknown token \"";
             narrow(name_.c_str(), ss_);
-            ss_ << "'.";
+            ss_ << "\".";
             throw runtime_error(ss_.str());
         }
 
@@ -911,7 +937,8 @@ private:
                         bracket_stack_.push(curr_bracket_);
                         _captures.back().second.push_back(std::
                             make_pair(static_cast<id_type>(production_.
-                                _rhs.first.size()), 0));
+                                _rhs.first.size()),
+                                static_cast<id_type>(0)));
                         break;
                     case ')':
                         --brackets_;

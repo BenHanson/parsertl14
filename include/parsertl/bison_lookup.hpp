@@ -60,7 +60,7 @@ void bison_next(const tables_struct &tables_, iterator &iter_,
 
     // SHIFT
     results_.entry.action = shift;
-    results_.entry.param = yyn_;
+    results_.entry.param = static_cast<typename results::id_type>(yyn_);
     return;
 
 yydefault:
@@ -75,7 +75,7 @@ yydefault:
 
 yyreduce:
     results_.entry.action = reduce;
-    results_.entry.param = yyn_;
+    results_.entry.param = static_cast<typename results::id_type>(yyn_);
 }
 
 template<typename tables_struct, typename iterator, typename results>
