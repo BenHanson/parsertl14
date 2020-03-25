@@ -15,7 +15,7 @@ namespace parsertl
     // Parse entire sequence and return boolean
     template<typename iterator, typename sm_type, typename lsm>
     bool match(iterator begin_, iterator end_,
-        const lsm &lsm_, const sm_type &gsm_)
+        const lsm& lsm_, const sm_type& gsm_)
     {
         using lex_iterator = lexertl::iterator<iterator, lsm,
             lexertl::match_results<iterator>>;
@@ -27,8 +27,8 @@ namespace parsertl
 
     template<typename iterator, typename captures, typename sm_type,
         typename lsm>
-    bool match(iterator begin_, iterator end_, captures &captures_,
-        lsm &lsm_, const sm_type &gsm_)
+        bool match(iterator begin_, iterator end_, captures& captures_,
+            lsm& lsm_, const sm_type& gsm_)
     {
         using lex_iterator = lexertl::iterator<iterator, lsm,
             lexertl::match_results<iterator>>;
@@ -47,19 +47,19 @@ namespace parsertl
         {
             if (results_.entry.action == parsertl::reduce)
             {
-                const auto &row_ = gsm_._captures[results_.entry.param];
+                const auto& row_ = gsm_._captures[results_.entry.param];
 
                 if (!row_.second.empty())
                 {
                     std::size_t index_ = 0;
 
-                    for (const auto &pair_ : row_.second)
+                    for (const auto& pair_ : row_.second)
                     {
-                        const auto &token1_ = results_.
+                        const auto& token1_ = results_.
                             dollar(gsm_, pair_.first, productions_);
-                        const auto &token2_ = results_.
+                        const auto& token2_ = results_.
                             dollar(gsm_, pair_.second, productions_);
-                        auto &entry_ = captures_[row_.first + index_ + 1];
+                        auto& entry_ = captures_[row_.first + index_ + 1];
 
                         entry_.push_back(std::make_pair(token1_.first,
                             token2_.second));
