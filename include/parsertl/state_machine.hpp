@@ -23,16 +23,18 @@ namespace parsertl
 
         struct entry
         {
-            eaction action;
+            // Qualify action to prevent compilation error
+            parsertl::action action;
             id_type param;
 
             entry() :
-                action(error),
-                param(syntax_error)
+                action(action::error),
+                param(static_cast<id_type>(error_type::syntax_error))
             {
             }
 
-            entry(const eaction action_, const id_type param_) :
+            // Qualify action to prevent compilation error
+            entry(const parsertl::action action_, const id_type param_) :
                 action(action_),
                 param(param_)
             {
@@ -40,8 +42,8 @@ namespace parsertl
 
             void clear()
             {
-                action = error;
-                param = syntax_error;
+                action = action::error;
+                param = static_cast<id_type>(error_type::syntax_error);
             }
         };
 

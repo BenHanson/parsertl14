@@ -17,8 +17,9 @@ namespace parsertl
     {
         if (iter_->id == iter_->npos())
         {
-            results_.entry.action = error;
-            results_.entry.param = unknown_token;
+            results_.entry.action = action::error;
+            results_.entry.param = static_cast<typename results::id_type>
+                (error_type::unknown_token);
             return;
         }
 
@@ -41,8 +42,9 @@ namespace parsertl
         {
             if (yyn_ == 0 || yyn_ == tables_struct::YYTABLE_NINF)
             {
-                results_.entry.action = error;
-                results_.entry.param = syntax_error;
+                results_.entry.action = action::error;
+                results_.entry.param = static_cast<typename results::id_type>
+                    (error_type::syntax_error);
                 return;
             }
 
@@ -53,13 +55,13 @@ namespace parsertl
         // ACCEPT
         if (yyn_ == tables_struct::YYFINAL)
         {
-            results_.entry.action = accept;
+            results_.entry.action = action::accept;
             results_.entry.param = 0;
             return;
         }
 
         // SHIFT
-        results_.entry.action = shift;
+        results_.entry.action = action::shift;
         results_.entry.param = static_cast<typename results::id_type>(yyn_);
         return;
 
@@ -68,13 +70,14 @@ namespace parsertl
 
         if (yyn_ == 0)
         {
-            results_.entry.action = error;
-            results_.entry.param = syntax_error;
+            results_.entry.action = action::error;
+            results_.entry.param = static_cast<typename results::id_type>
+                (error_type::syntax_error);
             return;
         }
 
     yyreduce:
-        results_.entry.action = reduce;
+        results_.entry.action = action::reduce;
         results_.entry.param = static_cast<typename results::id_type>(yyn_);
     }
 
@@ -84,9 +87,9 @@ namespace parsertl
     {
         switch (results_.entry.action)
         {
-        case error:
+        case action::error:
             break;
-        case shift:
+        case action::shift:
             results_.stack.push_back(results_.entry.param);
 
             if (results_.token_id != 0)
@@ -98,12 +101,12 @@ namespace parsertl
 
             if (results_.token_id == iterator::value_type::npos())
             {
-                results_.entry.action = error;
-                results_.entry.param = unknown_token;
+                results_.entry.action = action::error;
+                results_.entry.param = error_type::unknown_token;
             }
 
             break;
-        case reduce:
+        case action::reduce:
         {
             int size_ = tables_.yyr2[results_.entry.param];
 
@@ -113,12 +116,12 @@ namespace parsertl
             }
 
             results_.token_id = tables_.yyr1[results_.entry.param];
-            results_.entry.action = go_to;
+            results_.entry.action = action::go_to;
             results_.entry.param = tables_.yypgoto[results_.token_id -
                 tables_struct::YYNTOKENS] + results_.stack.back();
             // Drop through to go_to:
         }
-        case go_to:
+        case action::go_to:
             if (0 <= results_.entry.param &&
                 results_.entry.param <= tables_struct::YYLAST &&
                 tables_.yycheck[results_.entry.param] == results_.stack.back())
@@ -133,7 +136,7 @@ namespace parsertl
 
             results_.stack.push_back(results_.entry.param);
             break;
-        case accept:
+        case action::accept:
             return;
         }
     }
@@ -145,9 +148,9 @@ namespace parsertl
     {
         switch (results_.entry.action)
         {
-        case error:
+        case action::error:
             break;
-        case shift:
+        case action::shift:
             results_.stack.push_back(results_.entry.param);
             productions_.push_back(typename token_vector::value_type(iter_->id,
                 iter_->first, iter_->second));
@@ -161,12 +164,13 @@ namespace parsertl
 
             if (results_.token_id == iterator::value_type::npos())
             {
-                results_.entry.action = error;
-                results_.entry.param = unknown_token;
+                results_.entry.action = action::error;
+                results_.entry.param = static_cast<typename results::id_type>
+                    (error_type::unknown_token);
             }
 
             break;
-        case reduce:
+        case action::reduce:
         {
             int size_ = tables_.yyr2[results_.entry.param];
             typename token_vector::value_type token_;
@@ -192,12 +196,12 @@ namespace parsertl
 
             results_.token_id = tables_.yyr1[results_.entry.param];
             productions_.push_back(token_);
-            results_.entry.action = go_to;
+            results_.entry.action = action::go_to;
             results_.entry.param = tables_.yypgoto[results_.token_id -
                 tables_struct::YYNTOKENS] + results_.stack.back();
             // Drop through to go_to:
         }
-        case go_to:
+        case action::go_to:
             if (0 <= results_.entry.param &&
                 results_.entry.param <= tables_struct::YYLAST &&
                 tables_.yycheck[results_.entry.param] == results_.stack.back())
@@ -212,7 +216,7 @@ namespace parsertl
 
             results_.stack.push_back(results_.entry.param);
             break;
-        case accept:
+        case action::accept:
             return;
         }
     }

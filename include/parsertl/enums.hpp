@@ -9,7 +9,7 @@
 namespace parsertl
 {
     enum rule_flags { enable_captures = 1 };
-    enum eaction
+    enum class action
     {
         error,
         shift,
@@ -17,7 +17,7 @@ namespace parsertl
         go_to,
         accept
     };
-    enum error_type
+    enum class error_type
     {
         syntax_error,
         non_associative,

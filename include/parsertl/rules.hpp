@@ -48,7 +48,7 @@ namespace parsertl
 
         struct symbol
         {
-            enum type { TERMINAL, NON_TERMINAL };
+            enum class type { TERMINAL, NON_TERMINAL };
 
             type _type;
             std::size_t _id;
@@ -72,7 +72,7 @@ namespace parsertl
         };
 
         using symbol_vector = std::vector<symbol>;
-        enum associativity
+        enum class associativity
         {
             token_assoc, precedence_assoc, non_assoc, left_assoc, right_assoc
         };
@@ -89,7 +89,7 @@ namespace parsertl
             production(const std::size_t index_) :
                 _lhs(static_cast<std::size_t>(~0)),
                 _precedence(0),
-                _associativity(token_assoc),
+                _associativity(associativity::token_assoc),
                 _index(index_),
                 _next_lhs(static_cast<std::size_t>(~0))
             {
@@ -101,7 +101,7 @@ namespace parsertl
                 _rhs.first.clear();
                 _rhs.second.clear();
                 _precedence = 0;
-                _associativity = token_assoc;
+                _associativity = associativity::token_assoc;
                 _index = static_cast<std::size_t>(~0);
                 _next_lhs = static_cast<std::size_t>(~0);
             }
@@ -116,7 +116,7 @@ namespace parsertl
 
             token_info() :
                 _precedence(0),
-                _associativity(token_assoc)
+                _associativity(associativity::token_assoc)
             {
             }
 
@@ -196,7 +196,7 @@ namespace parsertl
         {
             lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-            token(iter_, 0, token_assoc, "token");
+            token(iter_, 0, associativity::token_assoc, "token");
         }
 
         void token(const string& names_)
@@ -204,14 +204,14 @@ namespace parsertl
             lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
                 _token_lexer);
 
-            token(iter_, 0, token_assoc, "token");
+            token(iter_, 0, associativity::token_assoc, "token");
         }
 
         void left(const char_type* names_)
         {
             lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-            token(iter_, _next_precedence, left_assoc, "left");
+            token(iter_, _next_precedence, associativity::left_assoc, "left");
             ++_next_precedence;
         }
 
@@ -220,7 +220,7 @@ namespace parsertl
             lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
                 _token_lexer);
 
-            token(iter_, _next_precedence, left_assoc, "left");
+            token(iter_, _next_precedence, associativity::left_assoc, "left");
             ++_next_precedence;
         }
 
@@ -228,7 +228,7 @@ namespace parsertl
         {
             lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-            token(iter_, _next_precedence, right_assoc, "right");
+            token(iter_, _next_precedence, associativity::right_assoc, "right");
             ++_next_precedence;
         }
 
@@ -237,7 +237,7 @@ namespace parsertl
             lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
                 _token_lexer);
 
-            token(iter_, _next_precedence, right_assoc, "right");
+            token(iter_, _next_precedence, associativity::right_assoc, "right");
             ++_next_precedence;
         }
 
@@ -245,7 +245,8 @@ namespace parsertl
         {
             lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-            token(iter_, _next_precedence, non_assoc, "nonassoc");
+            token(iter_, _next_precedence, associativity::non_assoc,
+                "nonassoc");
             ++_next_precedence;
         }
 
@@ -254,7 +255,8 @@ namespace parsertl
             lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
                 _token_lexer);
 
-            token(iter_, _next_precedence, non_assoc, "nonassoc");
+            token(iter_, _next_precedence, associativity::non_assoc,
+                "nonassoc");
             ++_next_precedence;
         }
 
@@ -262,7 +264,8 @@ namespace parsertl
         {
             lexer_iterator iter_(names_, str_end(names_), _token_lexer);
 
-            token(iter_, _next_precedence, precedence_assoc, "precedence");
+            token(iter_, _next_precedence, associativity::precedence_assoc,
+                "precedence");
             ++_next_precedence;
         }
 
@@ -271,7 +274,8 @@ namespace parsertl
             lexer_iterator iter_(names_.c_str(), names_.c_str() + names_.size(),
                 _token_lexer);
 
-            token(iter_, _next_precedence, precedence_assoc, "precedence");
+            token(iter_, _next_precedence, associativity::precedence_assoc,
+                "precedence");
             ++_next_precedence;
         }
 
@@ -317,10 +321,10 @@ namespace parsertl
 
             bison_next(_ebnf_tables, iter_, results_);
 
-            while (results_.entry.action != error &&
-                results_.entry.action != accept)
+            while (results_.entry.action != action::error &&
+                results_.entry.action != action::accept)
             {
-                if (results_.entry.action == reduce)
+                if (results_.entry.action == action::reduce)
                 {
                     switch (static_cast<ebnf_indexes>(results_.entry.param))
                     {
@@ -497,7 +501,7 @@ namespace parsertl
                 bison_next(_ebnf_tables, iter_, results_);
             }
 
-            if (results_.entry.action == error)
+            if (results_.entry.action == action::error)
             {
                 std::ostringstream ss_;
 
@@ -609,7 +613,7 @@ namespace parsertl
                 {
                     for (const auto& symbol_ : prod_._rhs.first)
                     {
-                        if (symbol_._type == symbol::NON_TERMINAL &&
+                        if (symbol_._type == symbol::type::NON_TERMINAL &&
                             symbol_._id == pair_.second)
                         {
                             found_ = true;
@@ -642,8 +646,8 @@ namespace parsertl
                 string rhs_ = _start;
 
                 push_production(accept_, rhs_);
-                _grammar.back()._rhs.first.push_back
-                (symbol(symbol::TERMINAL, insert_terminal(string(1, '$'))));
+                _grammar.back()._rhs.first.push_back(symbol(symbol::
+                    type::TERMINAL, insert_terminal(string(1, '$'))));
                 _start = accept_;
             }
             /*        else
@@ -920,10 +924,10 @@ namespace parsertl
             production_._lhs = lhs_id_;
             bison_next(_ebnf_tables, iter_, results_);
 
-            while (results_.entry.action != error &&
-                results_.entry.action != accept)
+            while (results_.entry.action != action::error &&
+                results_.entry.action != action::accept)
             {
-                if (results_.entry.action == shift)
+                if (results_.entry.action == action::shift)
                 {
                     switch (iter_->id)
                     {
@@ -956,8 +960,9 @@ namespace parsertl
                             throw runtime_error(ss_.str());
                         }
 
-                        _captures.back().second[bracket_stack_.top() - 1].
-                            second = static_cast<id_type>(production_.
+                        _captures.back().second[static_cast<std::size_t>
+                            (bracket_stack_.top()) - 1].second =
+                            static_cast<id_type>(production_.
                                 _rhs.first.size() - 1);
                         bracket_stack_.pop();
                         break;
@@ -976,7 +981,7 @@ namespace parsertl
                     }
                     }
                 }
-                else if (results_.entry.action == reduce)
+                else if (results_.entry.action == action::reduce)
                 {
                     switch (static_cast<ebnf_indexes>(results_.entry.param))
                     {
@@ -996,8 +1001,8 @@ namespace parsertl
 
                             // NON_TERMINAL
                             location(id_);
-                            production_._rhs.first.
-                                push_back(symbol(symbol::NON_TERMINAL, id_));
+                            production_._rhs.first.push_back(symbol(symbol::
+                                type::NON_TERMINAL, id_));
                         }
                         else
                         {
@@ -1013,7 +1018,7 @@ namespace parsertl
                             }
 
                             production_._rhs.first.
-                                push_back(symbol(symbol::TERMINAL, id_));
+                                push_back(symbol(symbol::type::TERMINAL, id_));
                         }
 
                         break;
@@ -1036,7 +1041,7 @@ namespace parsertl
                         }
 
                         production_._rhs.first.push_back(symbol(symbol::
-                            TERMINAL, id_));
+                            type::TERMINAL, id_));
                         break;
                     }
                     case ebnf_indexes::prec_ident_idx:
@@ -1067,7 +1072,7 @@ namespace parsertl
 
             // As rules passed in are generated,
             // they have already been validated.
-            assert(results_.entry.action == accept);
+            assert(results_.entry.action == action::accept);
             _grammar.push_back(production_);
         }
 

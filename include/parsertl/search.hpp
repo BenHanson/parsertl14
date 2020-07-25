@@ -59,6 +59,7 @@ namespace parsertl
         lex_iterator iter_(first_, second_, lsm_);
         lex_iterator end_;
         basic_match_results<sm_type> results_(iter_->id, gsm_);
+        // Qualify token to prevent arg dependant lookup
         using token = parsertl::token<lex_iterator>;
         using token_vector = typename token::token_vector;
         std::multimap<typename sm_type::id_type, token_vector> prod_map_;
@@ -140,14 +141,14 @@ namespace parsertl
             results_.reset(curr_->id, sm_);
             last_results_.clear();
 
-            while (results_.entry.action != accept &&
-                results_.entry.action != error)
+            while (results_.entry.action != action::accept &&
+                results_.entry.action != action::error)
             {
                 details::next(sm_, curr_, results_, prod_set_, last_eoi_,
                     last_results_);
             }
 
-            hit_ = results_.entry.action == accept;
+            hit_ = results_.entry.action == action::accept;
 
             if (hit_)
             {
@@ -199,13 +200,13 @@ namespace parsertl
             results_.reset(curr_->id, sm_);
             productions_.clear();
 
-            while (results_.entry.action != accept &&
-                results_.entry.action != error)
+            while (results_.entry.action != action::accept &&
+                results_.entry.action != action::error)
             {
                 details::next(sm_, curr_, results_, last_eoi_, productions_);
             }
 
-            hit_ = results_.entry.action == accept;
+            hit_ = results_.entry.action == action::accept;
 
             if (hit_)
             {
@@ -255,9 +256,9 @@ namespace parsertl
         {
             switch (results_.entry.action)
             {
-            case error:
+            case action::error:
                 break;
-            case shift:
+            case action::shift:
             {
                 const auto* ptr_ = &sm_._table[results_.entry.param *
                     sm_._columns];
@@ -273,15 +274,17 @@ namespace parsertl
 
                 if (results_.token_id == iterator::value_type::npos())
                 {
-                    results_.entry.action = error;
-                    results_.entry.param = unknown_token;
+                    results_.entry.action = action::error;
+                    results_.entry.param =
+                        static_cast<typename sm_type::id_type>
+                        (error_type::unknown_token);
                 }
                 else
                 {
                     results_.entry = ptr_[results_.token_id];
                 }
 
-                if (ptr_->action != error)
+                if (ptr_->action != action::error)
                 {
                     last_eoi_ = iter_;
                     last_results_.stack = results_.stack;
@@ -291,7 +294,7 @@ namespace parsertl
 
                 break;
             }
-            case reduce:
+            case action::reduce:
             {
                 const std::size_t size_ =
                     sm_._rules[results_.entry.param].second.size();
@@ -311,13 +314,13 @@ namespace parsertl
                     sm_._columns + results_.token_id];
                 break;
             }
-            case go_to:
+            case action::go_to:
                 results_.stack.push_back(results_.entry.param);
                 results_.token_id = iter_->id;
                 results_.entry = sm_._table[results_.stack.back() *
                     sm_._columns + results_.token_id];
                 break;
-            case accept:
+            case action::accept:
             {
                 const std::size_t size_ =
                     sm_._rules[results_.entry.param].second.size();
@@ -339,9 +342,9 @@ namespace parsertl
         {
             switch (results_.entry.action)
             {
-            case error:
+            case action::error:
                 break;
-            case shift:
+            case action::shift:
             {
                 const auto* ptr_ = &sm_._table[results_.entry.param *
                     sm_._columns];
@@ -359,22 +362,24 @@ namespace parsertl
 
                 if (results_.token_id == iterator::value_type::npos())
                 {
-                    results_.entry.action = error;
-                    results_.entry.param = unknown_token;
+                    results_.entry.action = action::error;
+                    results_.entry.param =
+                        static_cast<typename sm_type::id_type>
+                        (error_type::unknown_token);
                 }
                 else
                 {
                     results_.entry = ptr_[results_.token_id];
                 }
 
-                if (ptr_->action != error)
+                if (ptr_->action != action::error)
                 {
                     last_eoi_ = iter_;
                 }
 
                 break;
             }
-            case reduce:
+            case action::reduce:
             {
                 const std::size_t size_ =
                     sm_._rules[results_.entry.param].second.size();
@@ -407,13 +412,13 @@ namespace parsertl
                 productions_.push_back(token_);
                 break;
             }
-            case go_to:
+            case action::go_to:
                 results_.stack.push_back(results_.entry.param);
                 results_.token_id = iter_->id;
                 results_.entry = sm_._table[results_.stack.back() *
                     sm_._columns + results_.token_id];
                 break;
-            case accept:
+            case action::accept:
             {
                 const std::size_t size_ =
                     sm_._rules[results_.entry.param].second.size();
@@ -433,13 +438,13 @@ namespace parsertl
             basic_match_results<sm_type>& results_,
             std::set<typename sm_type::id_type>* prod_set_)
         {
-            while (results_.entry.action != error)
+            while (results_.entry.action != action::error)
             {
                 switch (results_.entry.action)
                 {
-                case error:
+                case action::error:
                     break;
-                case shift:
+                case action::shift:
                     results_.stack.push_back(results_.entry.param);
 
                     if (results_.token_id != 0)
@@ -451,8 +456,10 @@ namespace parsertl
 
                     if (results_.token_id == iterator::value_type::npos())
                     {
-                        results_.entry.action = error;
-                        results_.entry.param = unknown_token;
+                        results_.entry.action = action::error;
+                        results_.entry.param =
+                            static_cast<typename sm_type::id_type>
+                            (error_type::unknown_token);
                     }
                     else
                     {
@@ -461,7 +468,7 @@ namespace parsertl
                     }
 
                     break;
-                case reduce:
+                case action::reduce:
                 {
                     const std::size_t size_ =
                         sm_._rules[results_.entry.param].second.size();
@@ -481,7 +488,7 @@ namespace parsertl
                         sm_._columns + results_.token_id];
                     break;
                 }
-                case go_to:
+                case action::go_to:
                     results_.stack.push_back(results_.entry.param);
                     results_.token_id = iter_->id;
                     results_.entry = sm_._table[results_.stack.back() *
@@ -489,7 +496,7 @@ namespace parsertl
                     break;
                 }
 
-                if (results_.entry.action == accept)
+                if (results_.entry.action == action::accept)
                 {
                     const std::size_t size_ =
                         sm_._rules[results_.entry.param].second.size();
@@ -503,7 +510,7 @@ namespace parsertl
                 }
             }
 
-            return results_.entry.action == accept;
+            return results_.entry.action == action::accept;
         }
 
         template<typename sm_type, typename iterator, typename token_vector>
@@ -511,13 +518,13 @@ namespace parsertl
             basic_match_results<sm_type>& results_, token_vector& productions_,
             std::multimap<typename sm_type::id_type, token_vector>* prod_map_)
         {
-            while (results_.entry.action != error)
+            while (results_.entry.action != action::error)
             {
                 switch (results_.entry.action)
                 {
-                case error:
+                case action::error:
                     break;
-                case shift:
+                case action::shift:
                     results_.stack.push_back(results_.entry.param);
                     productions_.push_back(typename token_vector::
                         value_type(iter_->id, iter_->first, iter_->second));
@@ -531,8 +538,10 @@ namespace parsertl
 
                     if (results_.token_id == iterator::value_type::npos())
                     {
-                        results_.entry.action = error;
-                        results_.entry.param = unknown_token;
+                        results_.entry.action = action::error;
+                        results_.entry.param =
+                            static_cast<typename sm_type::id_type>
+                            (error_type::unknown_token);
                     }
                     else
                     {
@@ -541,7 +550,7 @@ namespace parsertl
                     }
 
                     break;
-                case reduce:
+                case action::reduce:
                 {
                     const std::size_t size_ =
                         sm_._rules[results_.entry.param].second.size();
@@ -581,7 +590,7 @@ namespace parsertl
                     productions_.push_back(token_);
                     break;
                 }
-                case go_to:
+                case action::go_to:
                     results_.stack.push_back(results_.entry.param);
                     results_.token_id = iter_->id;
                     results_.entry = sm_._table[results_.stack.back() *
@@ -589,7 +598,7 @@ namespace parsertl
                     break;
                 }
 
-                if (results_.entry.action == accept)
+                if (results_.entry.action == action::accept)
                 {
                     const std::size_t size_ =
                         sm_._rules[results_.entry.param].second.size();
@@ -603,7 +612,7 @@ namespace parsertl
                 }
             }
 
-            return results_.entry.action == accept;
+            return results_.entry.action == action::accept;
         }
     }
 }

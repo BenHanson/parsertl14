@@ -16,13 +16,13 @@ namespace parsertl
     bool parse(const sm_type& sm_, iterator& iter_,
         basic_match_results<sm_type>& results_)
     {
-        while (results_.entry.action != error)
+        while (results_.entry.action != action::error)
         {
             switch (results_.entry.action)
             {
-            case error:
+            case action::error:
                 break;
-            case shift:
+            case action::shift:
                 results_.stack.push_back(results_.entry.param);
 
                 if (results_.token_id != 0)
@@ -34,8 +34,9 @@ namespace parsertl
 
                 if (results_.token_id == iterator::value_type::npos())
                 {
-                    results_.entry.action = error;
-                    results_.entry.param = unknown_token;
+                    results_.entry.action = action::error;
+                    results_.entry.param = static_cast<typename sm_type::id_type>
+                        (error_type::unknown_token);
                 }
                 else
                 {
@@ -44,7 +45,7 @@ namespace parsertl
                 }
 
                 break;
-            case reduce:
+            case action::reduce:
             {
                 const std::size_t size_ =
                     sm_._rules[results_.entry.param].second.size();
@@ -59,7 +60,7 @@ namespace parsertl
                     sm_._columns + results_.token_id];
                 break;
             }
-            case go_to:
+            case action::go_to:
                 results_.stack.push_back(results_.entry.param);
                 results_.token_id = iter_->id;
                 results_.entry = sm_._table[results_.stack.back() *
@@ -67,7 +68,7 @@ namespace parsertl
                 break;
             }
 
-            if (results_.entry.action == accept)
+            if (results_.entry.action == action::accept)
             {
                 const std::size_t size_ =
                     sm_._rules[results_.entry.param].second.size();
@@ -81,7 +82,7 @@ namespace parsertl
             }
         }
 
-        return results_.entry.action == accept;
+        return results_.entry.action == action::accept;
     }
 }
 

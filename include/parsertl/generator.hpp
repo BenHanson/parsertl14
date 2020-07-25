@@ -120,7 +120,7 @@ namespace parsertl
                     {
                         const symbol& symbol_ = p_._rhs.first[pair_.second];
                         const std::size_t id_ =
-                            symbol_._type == symbol::TERMINAL ?
+                            symbol_._type == symbol::type::TERMINAL ?
                             symbol_._id : terminals_ + symbol_._id;
                         typename size_t_vector::const_iterator sym_iter_ =
                             std::find(symbols_.begin(), symbols_.end(), id_);
@@ -254,7 +254,7 @@ namespace parsertl
                             tidx_ != tsize_; ++tidx_)
                         {
                             const std::size_t id_ =
-                                symbol_._type == symbol::TERMINAL ?
+                                symbol_._type == symbol::type::TERMINAL ?
                                 symbol_._id :
                                 terminals_.size() + symbol_._id;
                             const size_t_pair& pr_ = st_._transitions[tidx_];
@@ -269,7 +269,7 @@ namespace parsertl
                         prod_._rhs_indexes.back().second = index_;
                         prod_._rhs.push_back(symbol_);
 
-                        if (symbol_._type == symbol::NON_TERMINAL)
+                        if (symbol_._type == symbol::type::NON_TERMINAL)
                         {
                             symbol& rhs_symbol_ = prod_._rhs.back();
 
@@ -321,7 +321,7 @@ namespace parsertl
                     {
                         const symbol& symbol_ = prod_._rhs[i_];
 
-                        if (symbol_._type != symbol::NON_TERMINAL ||
+                        if (symbol_._type != symbol::type::NON_TERMINAL ||
                             !nt_info_[symbol_._id]._nullable)
                         {
                             break;
@@ -350,7 +350,7 @@ namespace parsertl
                     {
                         const symbol& symbol_ = prod_._rhs[i_];
 
-                        if (symbol_._type == symbol::TERMINAL)
+                        if (symbol_._type == symbol::type::TERMINAL)
                         {
                             progress_ |=
                                 set_add(lhs_info_._first_set, symbol_._id);
@@ -388,7 +388,7 @@ namespace parsertl
 
                     for (; rhs_iter_ != rhs_end_; ++rhs_iter_)
                     {
-                        if (rhs_iter_->_type == symbol::NON_TERMINAL)
+                        if (rhs_iter_->_type == symbol::type::NON_TERMINAL)
                         {
                             auto next_iter_ = rhs_iter_ + 1;
                             nt_info& lhs_info_ = nt_info_[rhs_iter_->_id];
@@ -396,7 +396,7 @@ namespace parsertl
 
                             if (next_iter_ != rhs_end_)
                             {
-                                if (next_iter_->_type == symbol::TERMINAL)
+                                if (next_iter_->_type == symbol::type::TERMINAL)
                                 {
                                     const std::size_t id_ = next_iter_->_id;
 
@@ -426,7 +426,7 @@ namespace parsertl
                                                 static_cast<std::size_t>(~0);
 
                                             if (next_iter_->_type ==
-                                                symbol::TERMINAL)
+                                                symbol::type::TERMINAL)
                                             {
                                                 next_id_ = next_iter_->_id;
                                                 // Just add terminal.
@@ -511,12 +511,12 @@ namespace parsertl
                     if (id_ < terminals_)
                     {
                         // TERMINAL
-                        rhs_.action = shift;
+                        rhs_.action = action::shift;
                     }
                     else
                     {
                         // NON_TERMINAL
-                        rhs_.action = go_to;
+                        rhs_.action = action::go_to;
                     }
 
                     rhs_.param = static_cast<id_type>(tran_.second);
@@ -553,12 +553,12 @@ namespace parsertl
                             if (!follow_set_[i_]) continue;
 
                             entry& lhs_ = sm_._table[index_ * columns_ + i_];
-                            entry rhs_(reduce, static_cast<id_type>
+                            entry rhs_(action::reduce, static_cast<id_type>
                             (production_._index));
 
                             if (production_._lhs == start_)
                             {
-                                rhs_.action = accept;
+                                rhs_.action = action::accept;
                             }
 
                             fill_entry(rules_, d_._closure, symbols_,
@@ -587,7 +587,7 @@ namespace parsertl
 
                 for (const auto& symbol_ : production_._rhs.first)
                 {
-                    if (symbol_._type == symbol::TERMINAL)
+                    if (symbol_._type == symbol::type::TERMINAL)
                     {
                         pair_.second.
                             push_back(static_cast<id_type>(symbol_._id));
@@ -653,7 +653,7 @@ namespace parsertl
                     // SHIFT
                     const symbol& symbol_ = p_->_rhs.first[pair_.second];
 
-                    if (symbol_._type == symbol::NON_TERMINAL)
+                    if (symbol_._type == symbol::type::NON_TERMINAL)
                     {
                         for (std::size_t rule_ =
                             nt_locations_[symbol_._id]._first_production;
@@ -730,9 +730,10 @@ namespace parsertl
             { "ERROR", "SHIFT", "REDUCE", "GOTO", "ACCEPT" };
             bool error_ = false;
 
-            if (lhs_.action == error)
+            if (lhs_.action == action::error)
             {
-                if (lhs_.param == syntax_error)
+                if (static_cast<error_type>(lhs_.param) ==
+                    error_type::syntax_error)
                 {
                     // No conflict
                     lhs_ = rhs_;
@@ -745,16 +746,17 @@ namespace parsertl
             else
             {
                 std::size_t lhs_prec_ = 0;
-                typename rules::associativity lhs_assoc_ = rules::token_assoc;
+                typename rules::associativity lhs_assoc_ =
+                    rules::associativity::token_assoc;
                 std::size_t rhs_prec_ = 0;
                 const token_info* iter_ = &tokens_info_[id_];
 
-                if (lhs_.action == shift)
+                if (lhs_.action == action::shift)
                 {
                     lhs_prec_ = iter_->_precedence;
                     lhs_assoc_ = iter_->_associativity;
                 }
-                else if (lhs_.action == reduce)
+                else if (lhs_.action == action::reduce)
                 {
                     const production& prod_ = grammar_[lhs_.param];
 
@@ -762,16 +764,17 @@ namespace parsertl
                     lhs_assoc_ = prod_._associativity;
                 }
 
-                if (rhs_.action == shift)
+                if (rhs_.action == action::shift)
                 {
                     rhs_prec_ = iter_->_precedence;
                 }
-                else if (rhs_.action == reduce)
+                else if (rhs_.action == action::reduce)
                 {
                     rhs_prec_ = grammar_[rhs_.param]._precedence;
                 }
 
-                if (lhs_.action == shift && rhs_.action == reduce)
+                if (lhs_.action == action::shift &&
+                    rhs_.action == action::reduce)
                 {
                     if (lhs_prec_ == 0 || rhs_prec_ == 0)
                     {
@@ -780,10 +783,11 @@ namespace parsertl
                         {
                             std::ostringstream ss_;
 
-                            ss_ << actions_[lhs_.action];
+                            ss_ << actions_[static_cast<int>(lhs_.action)];
                             dump_action(grammar_, terminals_, config_, symbols_,
                                 id_, lhs_, ss_);
-                            ss_ << '/' << actions_[rhs_.action];
+                            ss_ << '/' <<
+                                actions_[static_cast<int>(rhs_.action)];
                             dump_action(grammar_, terminals_, config_, symbols_,
                                 id_, rhs_, ss_);
                             ss_ << " conflict.\n";
@@ -794,16 +798,17 @@ namespace parsertl
                     {
                         switch (lhs_assoc_)
                         {
-                        case rules::precedence_assoc:
+                        case rules::associativity::precedence_assoc:
                             // Favour shift (leave rhs as it is).
                             if (warnings_)
                             {
                                 std::ostringstream ss_;
 
-                                ss_ << actions_[lhs_.action];
+                                ss_ << actions_[static_cast<int>(lhs_.action)];
                                 dump_action(grammar_, terminals_, config_,
                                     symbols_, id_, lhs_, ss_);
-                                ss_ << '/' << actions_[rhs_.action];
+                                ss_ << '/' <<
+                                    actions_[static_cast<int>(rhs_.action)];
                                 dump_action(grammar_, terminals_, config_,
                                     symbols_, id_, rhs_, ss_);
                                 ss_ << " conflict.\n";
@@ -811,11 +816,12 @@ namespace parsertl
                             }
 
                             break;
-                        case rules::non_assoc:
-                            lhs_.action = error;
-                            lhs_.param = non_associative;
+                        case rules::associativity::non_assoc:
+                            lhs_.action = action::error;
+                            lhs_.param = static_cast<id_type>
+                                (error_type::non_associative);
                             break;
-                        case rules::left_assoc:
+                        case rules::associativity::left_assoc:
                             lhs_ = rhs_;
                             break;
                         }
@@ -825,7 +831,8 @@ namespace parsertl
                         lhs_ = rhs_;
                     }
                 }
-                else if (lhs_.action == reduce && rhs_.action == reduce)
+                else if (lhs_.action == action::reduce &&
+                    rhs_.action == action::reduce)
                 {
                     if (lhs_prec_ == 0 || rhs_prec_ == 0 ||
                         lhs_prec_ == rhs_prec_)
@@ -847,10 +854,10 @@ namespace parsertl
             {
                 std::ostringstream ss_;
 
-                ss_ << actions_[lhs_.action];
+                ss_ << actions_[static_cast<int>(lhs_.action)];
                 dump_action(grammar_, terminals_, config_, symbols_, id_, lhs_,
                     ss_);
-                ss_ << '/' << actions_[rhs_.action];
+                ss_ << '/' << actions_[static_cast<int>(rhs_.action)];
                 dump_action(grammar_, terminals_, config_, symbols_, id_, rhs_,
                     ss_);
                 ss_ << " conflict.\n";
@@ -863,7 +870,7 @@ namespace parsertl
             const string_vector& symbols_, const std::size_t id_,
             const entry& entry_, std::ostringstream& ss_)
         {
-            if (entry_.action == shift)
+            if (entry_.action == action::shift)
             {
                 for (const auto& c_ : config_)
                 {
@@ -877,7 +884,7 @@ namespace parsertl
                     }
                 }
             }
-            else if (entry_.action == reduce)
+            else if (entry_.action == action::reduce)
             {
                 const production& production_ = grammar_[entry_.param];
 
@@ -900,7 +907,8 @@ namespace parsertl
 
             if (sym_iter_ != sym_end_)
             {
-                const std::size_t id_ = sym_iter_->_type == symbol::TERMINAL ?
+                const std::size_t id_ =
+                    sym_iter_->_type == symbol::type::TERMINAL ?
                     sym_iter_->_id :
                     terminals_ + sym_iter_->_id;
 
@@ -913,7 +921,8 @@ namespace parsertl
 
             for (; sym_iter_ != sym_end_; ++sym_iter_, ++index_)
             {
-                const std::size_t id_ = sym_iter_->_type == symbol::TERMINAL ?
+                const std::size_t id_ =
+                    sym_iter_->_type == symbol::type::TERMINAL ?
                     sym_iter_->_id :
                     terminals_ + sym_iter_->_id;
 

@@ -132,12 +132,12 @@ namespace parsertl
         typename token::token_vector productions_;
         match_results results_(iter_->id, gsm_);
 
-        while (results_.entry.action != error &&
-            results_.entry.action != accept)
+        while (results_.entry.action != action::error &&
+            results_.entry.action != action::accept)
         {
             switch (results_.entry.action)
             {
-            case reduce:
+            case action::reduce:
                 if (results_.entry.param == token_index_)
                 {
                     const token& token_ =
@@ -202,7 +202,7 @@ namespace parsertl
             lookup(gsm_, iter_, results_, productions_);
         }
 
-        if (results_.entry.action == error)
+        if (results_.entry.action == action::error)
             throw std::runtime_error("Syntax error");
     }
 }

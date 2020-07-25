@@ -34,6 +34,7 @@ namespace parsertl
             lexertl::match_results<iterator>>;
         lex_iterator iter_(begin_, end_, lsm_);
         basic_match_results<sm_type> results_(iter_->id, gsm_);
+        // Qualify token to prevent arg dependant lookup
         using token = parsertl::token<lex_iterator>;
         typename token::token_vector productions_;
 
@@ -42,10 +43,10 @@ namespace parsertl
             gsm_._captures.back().second.size() + 1);
         captures_[0].push_back(std::make_pair(begin_, end_));
 
-        while (results_.entry.action != parsertl::error &&
-            results_.entry.action != parsertl::accept)
+        while (results_.entry.action != action::error &&
+            results_.entry.action != action::accept)
         {
-            if (results_.entry.action == parsertl::reduce)
+            if (results_.entry.action == action::reduce)
             {
                 const auto& row_ = gsm_._captures[results_.entry.param];
 
@@ -68,10 +69,10 @@ namespace parsertl
                 }
             }
 
-            parsertl::lookup(gsm_, iter_, results_, productions_);
+            lookup(gsm_, iter_, results_, productions_);
         }
 
-        return results_.entry.action == parsertl::accept;
+        return results_.entry.action == action::accept;
     }
 }
 

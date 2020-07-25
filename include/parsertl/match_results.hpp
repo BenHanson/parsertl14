@@ -24,8 +24,8 @@ namespace parsertl
             token_id(static_cast<id_type>(~0))
         {
             stack.push_back(0);
-            entry.action = error;
-            entry.param = unknown_token;
+            entry.action = action::error;
+            entry.param = static_cast<id_type>(error_type::unknown_token);
         }
 
         basic_match_results(const id_type token_id_, const sm_type& sm_)
@@ -49,8 +49,8 @@ namespace parsertl
 
             if (token_id == static_cast<id_type>(~0))
             {
-                entry.action = error;
-                entry.param = unknown_token;
+                entry.action = action::error;
+                entry.param = static_cast<id_type>(error_type::unknown_token);
             }
             else
             {
@@ -60,7 +60,7 @@ namespace parsertl
 
         id_type reduce_id() const
         {
-            if (entry.action != reduce)
+            if (entry.action != action::reduce)
             {
                 throw runtime_error("Not in a reduce state!");
             }
@@ -72,7 +72,7 @@ namespace parsertl
         typename token_vector::value_type& dollar(const sm_type& sm_,
             const std::size_t index_, token_vector& productions) const
         {
-            if (entry.action != reduce)
+            if (entry.action != action::reduce)
             {
                 throw runtime_error("Not in a reduce state!");
             }
@@ -85,7 +85,7 @@ namespace parsertl
         const typename token_vector::value_type& dollar(const sm_type& sm_,
             const std::size_t index_, const token_vector& productions) const
         {
-            if (entry.action != reduce)
+            if (entry.action != action::reduce)
             {
                 throw runtime_error("Not in a reduce state!");
             }
