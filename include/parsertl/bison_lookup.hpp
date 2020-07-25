@@ -160,7 +160,8 @@ namespace parsertl
                 ++iter_;
             }
 
-            results_.token_id = iter_->id;
+            results_.token_id =
+                static_cast<typename results::id_type>(iter_->id);
 
             if (results_.token_id == iterator::value_type::npos())
             {

@@ -38,7 +38,7 @@ namespace parsertl
                 const token_info& token_info_ = tokens_info_[idx_];
                 token_prec_assoc info_(token_info_._precedence,
                     token_info_._associativity);
-                typename token_map::iterator map_iter_ = map_.find(info_);
+                auto map_iter_ = map_.find(info_);
 
                 if (map_iter_ == map_.end())
                 {
@@ -55,19 +55,19 @@ namespace parsertl
             {
                 switch (pair_.first.second)
                 {
-                case rules::token_assoc:
+                case rules::associativity::token_assoc:
                     token(stream_);
                     break;
-                case rules::precedence_assoc:
+                case rules::associativity::precedence_assoc:
                     precedence(stream_);
                     break;
-                case rules::non_assoc:
+                case rules::associativity::non_assoc:
                     nonassoc(stream_);
                     break;
-                case rules::left_assoc:
+                case rules::associativity::left_assoc:
                     left(stream_);
                     break;
-                case rules::right_assoc:
+                case rules::associativity::right_assoc:
                     right(stream_);
                     break;
                 }
@@ -110,7 +110,7 @@ namespace parsertl
                             for (; rhs_iter_ != rhs_end_; ++rhs_iter_)
                             {
                                 const std::size_t id_ =
-                                    rhs_iter_->_type == symbol::TERMINAL ?
+                                    rhs_iter_->_type == symbol::type::TERMINAL ?
                                     rhs_iter_->_id :
                                     terminals_ + rhs_iter_->_id;
 
@@ -185,7 +185,7 @@ namespace parsertl
                     {
                         const symbol& symbol_ = p_._rhs[j_];
                         const std::size_t id_ = symbol_._type ==
-                            symbol::TERMINAL ? symbol_._id :
+                            symbol::type::TERMINAL ? symbol_._id :
                             terminals_ + symbol_._id;
 
                         if (j_ == pair_.second)
