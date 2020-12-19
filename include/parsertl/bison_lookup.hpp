@@ -201,6 +201,7 @@ namespace parsertl
             results_.entry.param = tables_.yypgoto[results_.token_id -
                 tables_struct::YYNTOKENS] + results_.stack.back();
             // Drop through to go_to:
+            // [[fallthrough]]; (C++17)
         }
         case action::go_to:
             if (0 <= results_.entry.param &&

@@ -56,6 +56,7 @@ namespace parsertl
             prod_vector new_grammar_;
             std::size_t new_start_ = static_cast<std::size_t>(~0);
             nt_info_vector new_nt_info_;
+            std::string warns_;
 
             rules_.validate();
             build_dfa(rules_, dfa_);
@@ -66,7 +67,16 @@ namespace parsertl
             build_follow_sets(new_grammar_, new_nt_info_);
             sm_.clear();
             build_table(rules_, dfa_, new_grammar_, new_nt_info_,
-                sm_, warnings_);
+                sm_, warns_);
+
+            // Warnings are now an error
+            // unless you are explicitly fetching them
+            if (!warns_.empty())
+                if (warnings_)
+                    *warnings_ = warns_;
+                else
+                    throw std::runtime_error(warns_);
+
             // If you get an assert here then your id_type
             // is too small for the table.
             assert(static_cast<id_type>(sm_._columns - 1) == sm_._columns - 1);
@@ -484,7 +494,7 @@ namespace parsertl
 
         static void build_table(const rules& rules_, const dfa& dfa_,
             const prod_vector& new_grammar_, const nt_info_vector& new_nt_info_,
-            sm& sm_, std::string* warnings_)
+            sm& sm_, std::string& warnings_)
         {
             const grammar& grammar_ = rules_.grammar();
             const std::size_t start_ = rules_.start();
@@ -721,7 +731,7 @@ namespace parsertl
         static void fill_entry(const rules& rules_,
             const size_t_pair_vector& config_, const string_vector& symbols_,
             entry& lhs_, const std::size_t id_, const entry& rhs_,
-            std::string* warnings_)
+            std::string& warnings_)
         {
             const grammar& grammar_ = rules_.grammar();
             const token_info_vector& tokens_info_ = rules_.tokens_info();
@@ -779,20 +789,17 @@ namespace parsertl
                     if (lhs_prec_ == 0 || rhs_prec_ == 0)
                     {
                         // Favour shift (leave lhs as it is).
-                        if (warnings_)
-                        {
-                            std::ostringstream ss_;
+                        std::ostringstream ss_;
 
-                            ss_ << actions_[static_cast<int>(lhs_.action)];
-                            dump_action(grammar_, terminals_, config_, symbols_,
-                                id_, lhs_, ss_);
-                            ss_ << '/' <<
-                                actions_[static_cast<int>(rhs_.action)];
-                            dump_action(grammar_, terminals_, config_, symbols_,
-                                id_, rhs_, ss_);
-                            ss_ << " conflict.\n";
-                            *warnings_ += ss_.str();
-                        }
+                        ss_ << actions_[static_cast<int>(lhs_.action)];
+                        dump_action(grammar_, terminals_, config_, symbols_,
+                            id_, lhs_, ss_);
+                        ss_ << '/' <<
+                            actions_[static_cast<int>(rhs_.action)];
+                        dump_action(grammar_, terminals_, config_, symbols_,
+                            id_, rhs_, ss_);
+                        ss_ << " conflict.\n";
+                        warnings_ += ss_.str();
                     }
                     else if (lhs_prec_ == rhs_prec_)
                     {
@@ -800,7 +807,6 @@ namespace parsertl
                         {
                         case rules::associativity::precedence_assoc:
                             // Favour shift (leave rhs as it is).
-                            if (warnings_)
                             {
                                 std::ostringstream ss_;
 
@@ -812,7 +818,7 @@ namespace parsertl
                                 dump_action(grammar_, terminals_, config_,
                                     symbols_, id_, rhs_, ss_);
                                 ss_ << " conflict.\n";
-                                *warnings_ += ss_.str();
+                                warnings_ += ss_.str();
                             }
 
                             break;
@@ -850,7 +856,7 @@ namespace parsertl
                 }
             }
 
-            if (error_ && warnings_)
+            if (error_)
             {
                 std::ostringstream ss_;
 
@@ -861,7 +867,7 @@ namespace parsertl
                 dump_action(grammar_, terminals_, config_, symbols_, id_, rhs_,
                     ss_);
                 ss_ << " conflict.\n";
-                *warnings_ += ss_.str();
+                warnings_ += ss_.str();
             }
         }
 
