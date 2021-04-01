@@ -28,7 +28,8 @@ namespace parsertl
             id_type param;
 
             entry() :
-                action(action::error),
+                // Qualify action to prevent compilation error
+                action(parsertl::action::error),
                 param(static_cast<id_type>(error_type::syntax_error))
             {
             }
@@ -42,7 +43,8 @@ namespace parsertl
 
             void clear()
             {
-                action = action::error;
+                // Qualify action to prevent compilation error
+                action = parsertl::action::error;
                 param = static_cast<id_type>(error_type::syntax_error);
             }
         };
