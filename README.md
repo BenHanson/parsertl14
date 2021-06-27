@@ -31,18 +31,18 @@ int main()
         lexertl::generator::build(lrules, lsm);
 
         std::string input = "One, 2, Three, Four";
-        typedef std::vector<std::pair<const char *, const char *> > capture_vector;
+        using capture_vector = std::vector<std::pair<const char *, const char *>>;
         std::vector<capture_vector> captures;
 
         if (parsertl::match(input.c_str(), input.c_str() + input.size(), captures, lsm, gsm))
         {
-            std::vector<capture_vector>::const_iterator cvi = captures.begin();
-            std::vector<capture_vector>::const_iterator cve = captures.end();
+            auto cvi = captures.cbegin();
+            auto cve = captures.cend();
 
             for (; cvi != cve ; ++cvi)
             {
-                capture_vector::const_iterator vi = cvi->begin();
-                capture_vector::const_iterator ve = cvi->end();
+                auto vi = cvi->cbegin();
+                auto ve = cvi->cend();
 
                 for (; vi != ve; ++vi)
                 {
