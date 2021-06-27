@@ -54,7 +54,7 @@ namespace parsertl
             }
             else
             {
-                entry = sm_._table[stack.back() * sm_._columns + token_id];
+                entry = sm_.at(stack.back(), token_id);
             }
         }
 
@@ -102,6 +102,7 @@ namespace parsertl
     };
 
     using match_results = basic_match_results<state_machine>;
+    using map_match_results = basic_match_results<map_state_machine>;
 }
 
 #endif

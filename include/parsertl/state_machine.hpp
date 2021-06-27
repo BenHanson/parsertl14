@@ -13,9 +13,21 @@
 namespace parsertl
 {
     template<typename id_ty>
-    struct basic_state_machine
+    struct base_state_machine
     {
         using id_type = id_ty;
+        using capture_vector = std::vector<std::pair<id_type, id_type>>;
+        using captures_vector =
+            std::vector<std::pair<std::size_t, capture_vector>>;
+        using id_type_vector = std::vector<id_type>;
+        using id_type_pair = std::pair<id_type, id_type_vector>;
+        using rules = std::vector<id_type_pair>;
+
+        std::size_t _columns = 0;
+        std::size_t _rows = 0;
+        rules _rules;
+        captures_vector _captures;
+
         // If you get a compile error here you have
         // failed to define an unsigned id type.
         static_assert(std::is_unsigned<id_type>::value,
@@ -49,41 +61,130 @@ namespace parsertl
             }
         };
 
-        using capture_vector = std::vector<std::pair<id_type, id_type>>;
-        using captures_vector =
-            std::vector<std::pair<std::size_t, capture_vector>>;
-        using table = std::vector<entry>;
-        using id_type_vector = std::vector<id_type>;
-        using id_type_pair = std::pair<id_type, id_type_vector>;
-        using rules = std::vector<id_type_pair>;
+        // No need to specify constructor.
+        // Just in case someone wants to use a pointer to the base
+        virtual ~base_state_machine() = default;
 
-        table _table;
-        std::size_t _columns;
-        std::size_t _rows;
-        rules _rules;
-        captures_vector _captures;
-
-        basic_state_machine() :
-            _columns(0),
-            _rows(0)
+        void clear()
         {
+            _columns = _rows = 0;
+            _rules.clear();
+            _captures.clear();
         }
+    };
+
+    // Uses uncompressed 2d array for state machine
+    template<typename id_ty>
+    class basic_state_machine : public base_state_machine<id_ty>
+    {
+    public:
+        using base_sm = base_state_machine<id_ty>;
+        using id_type = id_ty;
+        using entry = typename basic_state_machine::entry;
+        using table = std::vector<entry>;
+
+        // No need to specify constructor.
+        ~basic_state_machine() override = default;
 
         void clear()
         {
             _table.clear();
-            _columns = _rows = 0;
-            _rules.clear();
-            _captures.clear();
+            base_state_machine<id_type>::clear();
         }
 
         bool empty() const
         {
             return _table.empty();
         }
+
+        entry at(const std::size_t state_) const
+        {
+            return _table[state_ * base_sm::_columns];
+        }
+
+        entry at(const std::size_t state_, const std::size_t token_id_) const
+        {
+            return _table[state_ * base_sm::_columns + token_id_];
+        }
+
+        void set(const std::size_t state_, const std::size_t token_id_,
+            const entry& entry_)
+        {
+            _table[state_ * base_sm::_columns + token_id_] = entry_;
+        }
+
+        void push()
+        {
+            _table.resize(base_sm::_columns * base_sm::_rows);
+        }
+
+    private:
+        table _table;
+    };
+
+    // Uses a vector of maps for the state machine
+    template<typename id_ty>
+    class basic_map_state_machine : public base_state_machine<id_ty>
+    {
+    public:
+        using base_sm = base_state_machine<id_ty>;
+        using id_type = id_ty;
+        using entry = typename basic_state_machine<id_type>::entry;
+        using table = std::vector<std::map<std::size_t, entry>>;
+
+        // No need to specify constructor.
+        ~basic_map_state_machine() override = default;
+
+        void clear()
+        {
+            _table.clear();
+            base_sm::clear();
+        }
+
+        bool empty() const
+        {
+            return _table.empty();
+        }
+
+        entry at(const std::size_t state_) const
+        {
+            auto s_ = _table[state_];
+            auto iter_ = s_.find(0);
+
+            if (iter_ == s_.end())
+                return entry();
+            else
+                return iter_->second;
+        }
+
+        entry at(const std::size_t state_, const std::size_t token_id_) const
+        {
+            auto s_ = _table[state_];
+            auto iter_ = s_.find(token_id_);
+
+            if (iter_ == s_.end())
+                return entry();
+            else
+                return iter_->second;
+        }
+
+        void set(const std::size_t state_, const std::size_t token_id_,
+            const entry& entry_)
+        {
+            _table[state_][token_id_] = entry_;
+        }
+
+        void push()
+        {
+            _table.resize(base_sm::_rows);
+        }
+
+    private:
+        table _table;
     };
 
     using state_machine = basic_state_machine<uint16_t>;
+    using map_state_machine = basic_map_state_machine<uint16_t>;
 }
 
 #endif

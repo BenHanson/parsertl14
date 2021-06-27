@@ -35,13 +35,14 @@ namespace parsertl
                 if (results_.token_id == iterator::value_type::npos())
                 {
                     results_.entry.action = action::error;
-                    results_.entry.param = static_cast<typename sm_type::id_type>
+                    results_.entry.param =
+                        static_cast<typename sm_type::id_type>
                         (error_type::unknown_token);
                 }
                 else
                 {
-                    results_.entry = sm_._table[results_.stack.back() *
-                        sm_._columns + results_.token_id];
+                    results_.entry =
+                        sm_.at(results_.stack.back(), results_.token_id);
                 }
 
                 break;
@@ -56,15 +57,15 @@ namespace parsertl
                 }
 
                 results_.token_id = sm_._rules[results_.entry.param].first;
-                results_.entry = sm_._table[results_.stack.back() *
-                    sm_._columns + results_.token_id];
+                results_.entry =
+                    sm_.at(results_.stack.back(), results_.token_id);
                 break;
             }
             case action::go_to:
                 results_.stack.push_back(results_.entry.param);
                 results_.token_id = iter_->id;
-                results_.entry = sm_._table[results_.stack.back() *
-                    sm_._columns + results_.token_id];
+                results_.entry =
+                    sm_.at(results_.stack.back(), results_.token_id);
                 break;
             }
 

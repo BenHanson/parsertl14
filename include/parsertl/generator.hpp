@@ -14,12 +14,11 @@
 
 namespace parsertl
 {
-    template<typename rules, typename id_type = uint16_t>
+    template<typename rules, typename sm, typename id_type = uint16_t>
     class basic_generator
     {
     public:
         using production = typename rules::production;
-        using sm = basic_state_machine<id_type>;
         using symbol_vector = typename rules::symbol_vector;
 
         struct prod
@@ -507,7 +506,7 @@ namespace parsertl
             rules_.symbols(symbols_);
             sm_._columns = columns_;
             sm_._rows = dfa_.size();
-            sm_._table.resize(sm_._columns * sm_._rows);
+            sm_.push();
 
             for (const auto& d_ : dfa_)
             {
@@ -515,23 +514,17 @@ namespace parsertl
                 for (const auto& tran_ : d_._transitions)
                 {
                     const std::size_t id_ = tran_.first;
-                    entry& lhs_ = sm_._table[index_ * columns_ + id_];
-                    entry rhs_;
-
-                    if (id_ < terminals_)
-                    {
+                    entry lhs_ = sm_.at(index_, id_);
+                    const entry rhs_((id_ < terminals_) ?
                         // TERMINAL
-                        rhs_.action = action::shift;
-                    }
-                    else
-                    {
+                        action::shift :
                         // NON_TERMINAL
-                        rhs_.action = action::go_to;
-                    }
+                        action::go_to,
+                        static_cast<id_type>(tran_.second));
 
-                    rhs_.param = static_cast<id_type>(tran_.second);
-                    fill_entry(rules_, d_._closure, symbols_,
-                        lhs_, id_, rhs_, warnings_);
+                    if (fill_entry(rules_, d_._closure, symbols_,
+                        lhs_, id_, rhs_, warnings_))
+                        sm_.set(index_, id_, lhs_);
                 }
 
                 // reductions
@@ -557,22 +550,20 @@ namespace parsertl
                             }
                         }
 
-                        for (std::size_t i_ = 0, size_ = follow_set_.size();
-                            i_ < size_; ++i_)
+                        for (std::size_t id_ = 0, size_ = follow_set_.size();
+                            id_ < size_; ++id_)
                         {
-                            if (!follow_set_[i_]) continue;
+                            if (!follow_set_[id_]) continue;
 
-                            entry& lhs_ = sm_._table[index_ * columns_ + i_];
-                            entry rhs_(action::reduce, static_cast<id_type>
-                            (production_._index));
+                            entry lhs_ = sm_.at(index_, id_);
+                            const entry rhs_(production_._lhs == start_ ?
+                                action::accept :
+                                action::reduce,
+                                static_cast<id_type>(production_._index));
 
-                            if (production_._lhs == start_)
-                            {
-                                rhs_.action = action::accept;
-                            }
-
-                            fill_entry(rules_, d_._closure, symbols_,
-                                lhs_, i_, rhs_, warnings_);
+                            if (fill_entry(rules_, d_._closure, symbols_,
+                                lhs_, id_, rhs_, warnings_))
+                                sm_.set(index_, id_, lhs_);
                         }
                     }
                 }
@@ -728,11 +719,12 @@ namespace parsertl
             return hash_;
         }
 
-        static void fill_entry(const rules& rules_,
+        static bool fill_entry(const rules& rules_,
             const size_t_pair_vector& config_, const string_vector& symbols_,
             entry& lhs_, const std::size_t id_, const entry& rhs_,
             std::string& warnings_)
         {
+            bool modified_ = false;
             const grammar& grammar_ = rules_.grammar();
             const token_info_vector& tokens_info_ = rules_.tokens_info();
             const std::size_t terminals_ = tokens_info_.size();
@@ -747,6 +739,7 @@ namespace parsertl
                 {
                     // No conflict
                     lhs_ = rhs_;
+                    modified_ = true;
                 }
                 else
                 {
@@ -806,7 +799,7 @@ namespace parsertl
                         switch (lhs_assoc_)
                         {
                         case rules::associativity::precedence_assoc:
-                            // Favour shift (leave rhs as it is).
+                            // Favour shift (leave lhs as it is).
                             {
                                 std::ostringstream ss_;
 
@@ -823,18 +816,20 @@ namespace parsertl
 
                             break;
                         case rules::associativity::non_assoc:
-                            lhs_.action = action::error;
-                            lhs_.param = static_cast<id_type>
-                                (error_type::non_associative);
+                            lhs_ = entry(action::error, static_cast<id_type>
+                                (error_type::non_associative));
+                            modified_ = true;
                             break;
                         case rules::associativity::left_assoc:
                             lhs_ = rhs_;
+                            modified_ = true;
                             break;
                         }
                     }
                     else if (rhs_prec_ > lhs_prec_)
                     {
                         lhs_ = rhs_;
+                        modified_ = true;
                     }
                 }
                 else if (lhs_.action == action::reduce &&
@@ -848,6 +843,7 @@ namespace parsertl
                     else if (rhs_prec_ > lhs_prec_)
                     {
                         lhs_ = rhs_;
+                        modified_ = true;
                     }
                 }
                 else
@@ -869,6 +865,8 @@ namespace parsertl
                 ss_ << " conflict.\n";
                 warnings_ += ss_.str();
             }
+
+            return modified_;
         }
 
         static void dump_action(const grammar& grammar_,
@@ -948,8 +946,10 @@ namespace parsertl
         }
     };
 
-    using generator = basic_generator<rules>;
-    using wgenerator = basic_generator<wrules>;
+    using generator = basic_generator<rules, state_machine>;
+    using map_generator = basic_generator<rules, map_state_machine>;
+    using wgenerator = basic_generator<wrules, state_machine>;
+    using wmap_generator = basic_generator<wrules, map_state_machine>;
 }
 
 #endif
