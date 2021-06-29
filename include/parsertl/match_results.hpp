@@ -102,7 +102,7 @@ namespace parsertl
     };
 
     using match_results = basic_match_results<state_machine>;
-    using map_match_results = basic_match_results<map_state_machine>;
+    using uncompressed_match_results = basic_match_results<uncompressed_state_machine>;
 }
 
 #endif

@@ -6,8 +6,9 @@
 #ifndef PARSERTL_STATE_MACHINE_HPP
 #define PARSERTL_STATE_MACHINE_HPP
 
+#include <algorithm>
+#include <cstdint>
 #include "enums.hpp"
-#include <map>
 #include <vector>
 
 namespace parsertl
@@ -65,7 +66,7 @@ namespace parsertl
         // Just in case someone wants to use a pointer to the base
         virtual ~base_state_machine() = default;
 
-        void clear()
+        virtual void clear()
         {
             _columns = _rows = 0;
             _rules.clear();
@@ -73,23 +74,102 @@ namespace parsertl
         }
     };
 
-    // Uses uncompressed 2d array for state machine
+    // Uses a vector of vectors for the state machine
     template<typename id_ty>
     class basic_state_machine : public base_state_machine<id_ty>
     {
     public:
         using base_sm = base_state_machine<id_ty>;
         using id_type = id_ty;
-        using entry = typename basic_state_machine::entry;
-        using table = std::vector<entry>;
+        using entry = typename base_sm::entry;
+        using table = std::vector<std::vector<std::pair<std::size_t, entry>>>;
 
         // No need to specify constructor.
         ~basic_state_machine() override = default;
 
-        void clear()
+        void clear() override
         {
+            base_sm::clear();
             _table.clear();
-            base_state_machine<id_type>::clear();
+        }
+
+        bool empty() const
+        {
+            return _table.empty();
+        }
+
+        entry at(const std::size_t state_) const
+        {
+            const auto& s_ = _table[state_];
+            auto iter_ = std::find_if(s_.begin(), s_.end(),
+                [](const auto& pair)
+                {
+                    return pair.first == 0;
+                });
+
+            if (iter_ == s_.end())
+                return entry();
+            else
+                return iter_->second;
+        }
+
+        entry at(const std::size_t state_, const std::size_t token_id_) const
+        {
+            const auto& s_ = _table[state_];
+            auto iter_ = std::find_if(s_.begin(), s_.end(),
+                [token_id_](const auto& pair)
+                {
+                    return pair.first == token_id_;
+                });
+
+            if (iter_ == s_.end())
+                return entry();
+            else
+                return iter_->second;
+        }
+
+        void set(const std::size_t state_, const std::size_t token_id_,
+            const entry& entry_)
+        {
+            auto& s_ = _table[state_];
+            auto iter_ = std::find_if(s_.begin(), s_.end(),
+                [token_id_](const auto& pair)
+                {
+                    return pair.first == token_id_;
+                });
+
+            if (iter_ == s_.end())
+                s_.push_back(std::make_pair(token_id_, entry_));
+            else
+                iter_->second = entry_;
+        }
+
+        void push()
+        {
+            _table.resize(base_sm::_rows);
+        }
+
+    private:
+        table _table;
+    };
+
+    // Uses uncompressed 2d array for state machine
+    template<typename id_ty>
+    class basic_uncompressed_state_machine : public base_state_machine<id_ty>
+    {
+    public:
+        using base_sm = base_state_machine<id_ty>;
+        using id_type = id_ty;
+        using entry = typename base_sm::entry;
+        using table = std::vector<entry>;
+
+        // No need to specify constructor.
+        ~basic_uncompressed_state_machine() override = default;
+
+        void clear() override
+        {
+            base_sm::clear();
+            _table.clear();
         }
 
         bool empty() const
@@ -122,69 +202,8 @@ namespace parsertl
         table _table;
     };
 
-    // Uses a vector of maps for the state machine
-    template<typename id_ty>
-    class basic_map_state_machine : public base_state_machine<id_ty>
-    {
-    public:
-        using base_sm = base_state_machine<id_ty>;
-        using id_type = id_ty;
-        using entry = typename basic_state_machine<id_type>::entry;
-        using table = std::vector<std::map<std::size_t, entry>>;
-
-        // No need to specify constructor.
-        ~basic_map_state_machine() override = default;
-
-        void clear()
-        {
-            _table.clear();
-            base_sm::clear();
-        }
-
-        bool empty() const
-        {
-            return _table.empty();
-        }
-
-        entry at(const std::size_t state_) const
-        {
-            auto s_ = _table[state_];
-            auto iter_ = s_.find(0);
-
-            if (iter_ == s_.end())
-                return entry();
-            else
-                return iter_->second;
-        }
-
-        entry at(const std::size_t state_, const std::size_t token_id_) const
-        {
-            auto s_ = _table[state_];
-            auto iter_ = s_.find(token_id_);
-
-            if (iter_ == s_.end())
-                return entry();
-            else
-                return iter_->second;
-        }
-
-        void set(const std::size_t state_, const std::size_t token_id_,
-            const entry& entry_)
-        {
-            _table[state_][token_id_] = entry_;
-        }
-
-        void push()
-        {
-            _table.resize(base_sm::_rows);
-        }
-
-    private:
-        table _table;
-    };
-
     using state_machine = basic_state_machine<uint16_t>;
-    using map_state_machine = basic_map_state_machine<uint16_t>;
+    using uncompressed_state_machine = basic_uncompressed_state_machine<uint16_t>;
 }
 
 #endif
