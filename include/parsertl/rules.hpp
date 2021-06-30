@@ -666,8 +666,8 @@ namespace parsertl
                                     std::ostringstream ss_;
                                     const string name_ = name_from_id(p_._lhs);
 
-                                    ss_ << "The start symbol occurs on "
-                                        "the RHS of rule '";
+                                    ss_ << "The start symbol occurs on the "
+                                        "RHS of rule '";
                                     narrow(name_.c_str(), ss_);
                                     ss_ << "'.";
                                     throw runtime_error(ss_.str());

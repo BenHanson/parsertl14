@@ -21,8 +21,8 @@ namespace parsertl
         template<typename sm_type, typename iterator>
         void next(const sm_type& sm_, iterator& iter_,
             basic_match_results<sm_type>& results_,
-            std::set<typename sm_type::id_type>* prod_set_, iterator& last_eoi_,
-            basic_match_results<sm_type>& last_results_);
+            std::set<typename sm_type::id_type>* prod_set_,
+            iterator& last_eoi_, basic_match_results<sm_type>& last_results_);
         template<typename sm_type, typename iterator, typename token_vector>
         void next(const sm_type& sm_, iterator& iter_,
             basic_match_results<sm_type>& results_, iterator& last_eoi_,
@@ -251,8 +251,8 @@ namespace parsertl
         template<typename sm_type, typename iterator>
         void next(const sm_type& sm_, iterator& iter_,
             basic_match_results<sm_type>& results_,
-            std::set<typename sm_type::id_type>* prod_set_, iterator& last_eoi_,
-            basic_match_results<sm_type>& last_results_)
+            std::set<typename sm_type::id_type>* prod_set_,
+            iterator& last_eoi_, basic_match_results<sm_type>& last_results_)
         {
             switch (results_.entry.action)
             {

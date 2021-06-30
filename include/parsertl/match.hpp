@@ -14,8 +14,8 @@ namespace parsertl
 {
     // Parse entire sequence and return boolean
     template<typename iterator, typename sm_type, typename lsm>
-    bool match(iterator begin_, iterator end_,
-        const lsm& lsm_, const sm_type& gsm_)
+    bool match(iterator begin_, iterator end_, const lsm& lsm_,
+        const sm_type& gsm_)
     {
         using lex_iterator = lexertl::iterator<iterator, lsm,
             lexertl::match_results<iterator>>;

@@ -21,7 +21,6 @@ namespace parsertl
         case action::error:
             break;
         case action::shift:
-        {
             results_.stack.push_back(results_.entry.param);
 
             if (results_.token_id != 0)
@@ -43,7 +42,6 @@ namespace parsertl
             }
 
             break;
-        }
         case action::reduce:
         {
             const std::size_t size_ =
@@ -88,7 +86,6 @@ namespace parsertl
         case action::error:
             break;
         case action::shift:
-        {
             results_.stack.push_back(results_.entry.param);
             productions_.push_back(typename token_vector::value_type(iter_->id,
                 iter_->first, iter_->second));
@@ -113,7 +110,6 @@ namespace parsertl
             }
 
             break;
-        }
         case action::reduce:
         {
             const std::size_t size_ =

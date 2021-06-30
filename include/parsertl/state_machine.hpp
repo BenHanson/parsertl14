@@ -82,7 +82,7 @@ namespace parsertl
         using base_sm = base_state_machine<id_ty>;
         using id_type = id_ty;
         using entry = typename base_sm::entry;
-        using table = std::vector<std::vector<std::pair<std::size_t, entry>>>;
+        using table = std::vector<std::vector<std::pair<id_type, entry>>>;
 
         // No need to specify constructor.
         ~basic_state_machine() override = default;
@@ -139,7 +139,8 @@ namespace parsertl
                 });
 
             if (iter_ == s_.end())
-                s_.push_back(std::make_pair(token_id_, entry_));
+                s_.push_back(std::make_pair(static_cast<id_type>
+                    (token_id_), entry_));
             else
                 iter_->second = entry_;
         }
