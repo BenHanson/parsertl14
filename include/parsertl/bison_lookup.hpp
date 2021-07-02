@@ -102,7 +102,8 @@ namespace parsertl
             if (results_.token_id == iterator::value_type::npos())
             {
                 results_.entry.action = action::error;
-                results_.entry.param = error_type::unknown_token;
+                results_.entry.param = static_cast<typename results::id_type>
+                    (error_type::unknown_token);
             }
 
             break;
