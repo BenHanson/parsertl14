@@ -494,6 +494,8 @@ namespace parsertl
                             productions_[idx_ + 1].str());
                         break;
                     }
+                    default:
+                        break;
                     }
                 }
 
@@ -1063,6 +1065,8 @@ namespace parsertl
                         production_._rhs.second = token_;
                         break;
                     }
+                    default:
+                        break;
                     }
                 }
 

@@ -71,10 +71,13 @@ namespace parsertl
             // Warnings are now an error
             // unless you are explicitly fetching them
             if (!warns_.empty())
+            {
+                // Braces to avoid clang warning
                 if (warnings_)
                     *warnings_ = warns_;
                 else
                     throw std::runtime_error(warns_);
+            }
 
             // If you get an assert here then your id_type
             // is too small for the table.
@@ -823,6 +826,8 @@ namespace parsertl
                         case rules::associativity::left_assoc:
                             lhs_ = rhs_;
                             modified_ = true;
+                            break;
+                        default:
                             break;
                         }
                     }
