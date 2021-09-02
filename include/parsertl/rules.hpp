@@ -62,7 +62,8 @@ namespace parsertl
             bool operator<(const symbol& rhs_) const
             {
                 return _type < rhs_._type ||
-                    _type == rhs_._type && _id < rhs_._id;
+                    // Added parenthesis to allow -Wall on clang++
+                    (_type == rhs_._type && _id < rhs_._id);
             }
 
             bool operator==(const symbol& rhs_) const
