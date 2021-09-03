@@ -596,6 +596,8 @@ namespace parsertl
                     results_.entry =
                         sm_.at(results_.stack.back(), results_.token_id);
                     break;
+                default:
+                    break;
                 }
 
                 if (results_.entry.action == action::accept)
