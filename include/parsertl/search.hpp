@@ -102,12 +102,12 @@ namespace parsertl
 
             for (const auto& pair_ : prod_map_)
             {
-                typename token::iter_type second_ =
+                typename token::iter_type sec_ =
                     pair_.second.back().second;
 
-                if (second_ > last_)
+                if (sec_ > last_)
                 {
-                    last_ = second_;
+                    last_ = sec_;
                 }
             }
 
