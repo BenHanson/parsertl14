@@ -41,6 +41,17 @@ namespace parsertl
         {
             return string(first, second);
         }
+
+        string substr(const std::size_t soffset_,
+            const std::size_t eoffset_) const
+        {
+            return string(first + soffset_, second - eoffset_);
+        }
+
+        std::size_t length() const
+        {
+            return second - first;
+        }
     };
 }
 
