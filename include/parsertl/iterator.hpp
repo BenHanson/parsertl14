@@ -1,13 +1,14 @@
 // iterator.hpp
-// Copyright (c) 2018 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2022 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #ifndef PARSERTL_ITERATOR_HPP
 #define PARSERTL_ITERATOR_HPP
 
+#include "lookup.hpp"
 #include "match_results.hpp"
-#include "search.hpp"
+#include "token.hpp"
 
 namespace parsertl
 {
@@ -16,29 +17,36 @@ namespace parsertl
         class iterator
     {
     public:
-        using results = std::vector<std::vector<std::pair<iter, iter>>>;
+        using results = basic_match_results<gsm_type>;
         using value_type = results;
         using difference_type = ptrdiff_t;
         using pointer = const value_type*;
         using reference = const value_type&;
         using iterator_category = std::forward_iterator_tag;
 
+        using lex_iterator = lexertl::iterator<iter, lsm_type,
+            lexertl::match_results<iter>>;
+        // Qualify token to prevent arg dependant lookup
+        using token = parsertl::token<lex_iterator>;
+        using token_vector = typename token::token_vector;
+
         iterator() :
-            _end(),
-            _lsm(nullptr),
             _gsm(nullptr)
         {
         }
 
-        iterator(const iter& start_, const iter& end_, const lsm_type& lsm,
-            const gsm_type& gsm) :
-            _lsm(&lsm),
-            _gsm(&gsm)
+        iterator(const iter& first_, const iter& second_,
+            const lsm_type& lsm_, const gsm_type& gsm_) :
+            _iter(first_, second_, lsm_),
+            _results(_iter->id, gsm_),
+            _gsm(&gsm_)
         {
-            _end = end_;
-            _captures.push_back(std::vector<std::pair<iter, iter>>());
-            _captures.back().push_back(std::make_pair(start_, start_));
             lookup();
+        }
+
+        typename token_vector::value_type dollar(const std::size_t index_) const
+        {
+            return _results.dollar(*_gsm, index_, _productions);
         }
 
         iterator& operator ++()
@@ -57,19 +65,19 @@ namespace parsertl
 
         const value_type& operator *() const
         {
-            return _captures;
+            return _results;
         }
 
         const value_type* operator ->() const
         {
-            return &_captures;
+            return &_results;
         }
 
         bool operator ==(const iterator& rhs_) const
         {
-            return _lsm == rhs_._lsm && _gsm == rhs_._gsm &&
+            return _gsm == rhs_._gsm &&
                 (_gsm == nullptr ? true :
-                    _captures == rhs_._captures);
+                    _results == rhs_._results);
         }
 
         bool operator !=(const iterator& rhs_) const
@@ -78,21 +86,25 @@ namespace parsertl
         }
 
     private:
-        iter _end;
-        results _captures;
-        const lsm_type* _lsm;
+        lex_iterator _iter;
+        basic_match_results<gsm_type> _results;
+        token_vector _productions;
         const gsm_type* _gsm;
 
         void lookup()
         {
-            const auto pair_ = _captures[0].back();
-
-            _captures.clear();
-
-            if (!search(pair_.second, _end, _captures, *_lsm, *_gsm))
+            do
             {
-                _lsm = nullptr;
+                parsertl::lookup(*_gsm, _iter, _results, _productions);
+            } while (_results.entry.action == action::shift ||
+                _results.entry.action == action::go_to);
+
+            switch (_results.entry.action)
+            {
+            case action::accept:
+            case action::error:
                 _gsm = nullptr;
+                break;
             }
         }
     };
@@ -102,8 +114,8 @@ namespace parsertl
     using citerator = iterator<const char*, lexertl::state_machine,
         state_machine>;
     using wsiterator = iterator<std::wstring::const_iterator,
-        lexertl::state_machine, state_machine>;
-    using wciterator = iterator<const wchar_t*, lexertl::state_machine,
+        lexertl::wstate_machine, state_machine>;
+    using wciterator = iterator<const wchar_t*, lexertl::wstate_machine,
         state_machine>;
 }
 

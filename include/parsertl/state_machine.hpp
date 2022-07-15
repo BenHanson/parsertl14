@@ -60,6 +60,11 @@ namespace parsertl
                 action = parsertl::action::error;
                 param = static_cast<id_type>(error_type::syntax_error);
             }
+
+            bool operator ==(const entry& rhs_) const
+            {
+                return action == rhs_.action && param == rhs_.param;
+            }
         };
 
         // No need to specify constructor.
