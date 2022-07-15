@@ -81,8 +81,8 @@ The `captures` argument can be omitted if it is not required in both cases.
 You can use an iterator instead of calling search:
 
 ```cpp
-    parsertl::citerator iter(input.c_str(), input.c_str() + input.size(), lsm, gsm);
-    parsertl::citerator end;
+    parsertl::csearch_iterator iter(input.c_str(), input.c_str() + input.size(), lsm, gsm);
+    parsertl::csearch_iterator end;
 
     for (; iter != end; ++iter)
     {
