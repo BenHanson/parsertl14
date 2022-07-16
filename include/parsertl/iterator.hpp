@@ -41,7 +41,10 @@ namespace parsertl
             _results(_iter->id, gsm_),
             _gsm(&gsm_)
         {
-            lookup();
+            // The first action can only ever be reduce
+            // if the grammar treats no input as valid.
+            if (_results.entry.action != action::reduce)
+                lookup();
         }
 
         typename token_vector::value_type dollar(const std::size_t index_) const
@@ -93,6 +96,7 @@ namespace parsertl
 
         void lookup()
         {
+            // do while because we need to move past the current reduce action
             do
             {
                 parsertl::lookup(*_gsm, _iter, _results, _productions);
