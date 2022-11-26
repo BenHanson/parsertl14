@@ -1,5 +1,5 @@
 // match.hpp
-// Copyright (c) 2018 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2018-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -41,7 +41,7 @@ namespace parsertl
         captures_.clear();
         captures_.resize(gsm_._captures.back().first +
             gsm_._captures.back().second.size() + 1);
-        captures_[0].push_back(std::make_pair(begin_, end_));
+        captures_[0].emplace_back(begin_, end_);
 
         while (results_.entry.action != action::error &&
             results_.entry.action != action::accept)
@@ -62,8 +62,7 @@ namespace parsertl
                             dollar(gsm_, pair_.second, productions_);
                         auto& entry_ = captures_[row_.first + index_ + 1];
 
-                        entry_.push_back(std::make_pair(token1_.first,
-                            token2_.second));
+                        entry_.emplace_back(token1_.first, token2_.second);
                         ++index_;
                     }
                 }

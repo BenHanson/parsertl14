@@ -1,5 +1,5 @@
 // match_results.hpp
-// Copyright (c) 2017-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2017-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -17,11 +17,10 @@ namespace parsertl
     {
         using id_type = typename sm_type::id_type;
         std::vector<id_type> stack;
-        id_type token_id;
+        id_type token_id = static_cast<id_type>(~0);
         typename sm_type::entry entry;
 
-        basic_match_results() :
-            token_id(static_cast<id_type>(~0))
+        basic_match_results()
         {
             stack.push_back(0);
             entry.action = action::error;

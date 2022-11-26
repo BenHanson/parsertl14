@@ -1,5 +1,5 @@
 // nt_info.hpp
-// Copyright (c) 2016-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2016-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -14,12 +14,11 @@ namespace parsertl
 
     struct nt_info
     {
-        bool _nullable;
+        bool _nullable = false;
         char_vector _first_set;
         char_vector _follow_set;
 
-        nt_info(const std::size_t terminals_) :
-            _nullable(false),
+        explicit nt_info(const std::size_t terminals_) :
             _first_set(terminals_, 0),
             _follow_set(terminals_, 0)
         {

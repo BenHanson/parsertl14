@@ -1,5 +1,5 @@
 // generator.hpp
-// Copyright (c) 2014-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2014-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,19 +24,13 @@ namespace parsertl
         struct prod
         {
             // Not owner
-            const production* _production;
-            std::size_t _lhs;
+            const production* _production = nullptr;
+            std::size_t _lhs = static_cast<std::size_t>(~0);
             size_t_pair _lhs_indexes;
             symbol_vector _rhs;
             size_t_pair_vector _rhs_indexes;
 
-            prod() :
-                _production(0),
-                _lhs(static_cast<std::size_t>(~0))
-            {
-            }
-
-            void swap(prod& rhs_)
+            void swap(prod& rhs_) noexcept
             {
                 std::swap(_production, rhs_._production);
                 std::swap(_lhs, rhs_._lhs);
@@ -53,7 +47,7 @@ namespace parsertl
         {
             dfa dfa_;
             prod_vector new_grammar_;
-            std::size_t new_start_ = static_cast<std::size_t>(~0);
+            auto new_start_ = static_cast<std::size_t>(~0);
             nt_info_vector new_nt_info_;
             std::string warns_;
 
@@ -94,21 +88,21 @@ namespace parsertl
             const std::size_t start_ = rules_.start();
             hash_map hash_map_;
 
-            dfa_.push_back(dfa_state());
+            dfa_.emplace_back();
 
             // Only applies if build_dfa() has been called directly
             // from client code (i.e. build() will have already called
             // validate() in the normal case).
             if (start_ == npos())
             {
-                dfa_.back()._basis.push_back(size_t_pair(0, 0));
+                dfa_.back()._basis.emplace_back(0, 0);
             }
             else
             {
                 const std::size_t index_ = rules_.nt_locations()[start_].
                     _first_production;
 
-                dfa_.back()._basis.push_back(size_t_pair(index_, 0));
+                dfa_.back()._basis.emplace_back(index_, 0);
             }
 
             hash_map_[hash_set(dfa_.back()._basis)].push_back(0);
@@ -141,7 +135,7 @@ namespace parsertl
                         if (sym_iter_ == symbols_.end())
                         {
                             symbols_.push_back(id_);
-                            item_sets_.push_back(size_t_pair_vector());
+                            item_sets_.emplace_back();
                             item_sets_.back().push_back(new_pair_);
                         }
                         else
@@ -168,7 +162,7 @@ namespace parsertl
 
                     std::sort(basis_.begin(), basis_.end());
                     index_ = add_dfa_state(dfa_, hash_map_, basis_);
-                    state_._transitions.push_back(size_t_pair(*iter_, index_));
+                    state_._transitions.emplace_back(*iter_, index_);
                 }
             }
         }
@@ -250,7 +244,7 @@ namespace parsertl
 
                     if (production_._rhs.first.empty())
                     {
-                        prod_._rhs_indexes.push_back(size_t_pair(sidx_, sidx_));
+                        prod_._rhs_indexes.emplace_back(sidx_, sidx_);
                     }
 
                     for (std::size_t ridx_ = 0, rsize_ = production_._rhs.
@@ -259,7 +253,7 @@ namespace parsertl
                         const symbol& symbol_ = production_._rhs.first[ridx_];
                         const dfa_state& st_ = dfa_[index_];
 
-                        prod_._rhs_indexes.push_back(size_t_pair(index_, 0));
+                        prod_._rhs_indexes.emplace_back(index_, 0);
 
                         for (std::size_t tidx_ = 0,
                             tsize_ = st_._transitions.size();
@@ -301,7 +295,7 @@ namespace parsertl
                         }
                     }
 
-                    new_grammar_.push_back(prod());
+                    new_grammar_.emplace_back();
                     new_grammar_.back().swap(prod_);
                 }
             }
@@ -320,7 +314,7 @@ namespace parsertl
             // First compute all lambdas
             do
             {
-                progress_ = 0;
+                progress_ = false;
 
                 for (const auto& prod_ : grammar_)
                 {
@@ -343,7 +337,7 @@ namespace parsertl
                     if (i_ == rhs_size_)
                     {
                         nt_info_[prod_._lhs]._nullable = true;
-                        progress_ = 1;
+                        progress_ = true;
                     }
                 }
             } while (progress_);
@@ -351,7 +345,7 @@ namespace parsertl
             // Now compute all first sets
             do
             {
-                progress_ = 0;
+                progress_ = false;
 
                 for (const auto& prod_ : grammar_)
                 {
@@ -582,7 +576,7 @@ namespace parsertl
 
             for (const production& production_ : grammar_)
             {
-                sm_._rules.push_back(typename sm::id_type_pair());
+                sm_._rules.emplace_back();
 
                 typename sm::id_type_pair& pair_ = sm_._rules.back();
 
@@ -599,7 +593,7 @@ namespace parsertl
                     else
                     {
                         pair_.second.push_back(static_cast<id_type>
-                        (terminals_ + symbol_._id));
+                            (terminals_ + symbol_._id));
                     }
                 }
             }
@@ -702,7 +696,7 @@ namespace parsertl
             {
                 index_ = dfa_.size();
                 states_.push_back(index_);
-                dfa_.push_back(dfa_state());
+                dfa_.emplace_back();
                 dfa_.back()._basis.swap(basis_);
             }
 

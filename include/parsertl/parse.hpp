@@ -1,5 +1,5 @@
 // parse.hpp
-// Copyright (c) 2017-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2017-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -20,8 +20,6 @@ namespace parsertl
         {
             switch (results_.entry.action)
             {
-            case action::error:
-                break;
             case action::shift:
                 results_.stack.push_back(results_.entry.param);
 
@@ -66,6 +64,10 @@ namespace parsertl
                 results_.token_id = iter_->id;
                 results_.entry =
                     sm_.at(results_.stack.back(), results_.token_id);
+                break;
+            default:
+                // action::accept
+                // action::error
                 break;
             }
 

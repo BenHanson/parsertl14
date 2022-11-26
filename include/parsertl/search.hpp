@@ -1,5 +1,5 @@
 // search.hpp
-// Copyright (c) 2017-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2017-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -74,7 +74,7 @@ namespace parsertl
             captures_.resize((gsm_._captures.empty() ? 0 :
                 gsm_._captures.back().first +
                 gsm_._captures.back().second.size()) + 1);
-            captures_[0].push_back(std::make_pair(iter_->first, iter_->first));
+            captures_[0].emplace_back(iter_->first, iter_->first);
 
             for (const auto& pair_ : prod_map_)
             {
@@ -92,8 +92,7 @@ namespace parsertl
                             const auto& token2_ = pair_.second[token_.second];
                             auto& entry_ = captures_[row_.first + index_ + 1];
 
-                            entry_.push_back(std::make_pair(token1_.first,
-                                token2_.second));
+                            entry_.emplace_back(token1_.first, token2_.second);
                             ++index_;
                         }
                     }
@@ -256,8 +255,6 @@ namespace parsertl
         {
             switch (results_.entry.action)
             {
-            case action::error:
-                break;
             case action::shift:
             {
                 const auto eoi_ = sm_.at(results_.entry.param);
@@ -332,6 +329,9 @@ namespace parsertl
 
                 break;
             }
+            default:
+                // action::error
+                break;
             }
         }
 
@@ -342,15 +342,13 @@ namespace parsertl
         {
             switch (results_.entry.action)
             {
-            case action::error:
-                break;
             case action::shift:
             {
                 const auto eoi_ = sm_.at(results_.entry.param);
 
                 results_.stack.push_back(results_.entry.param);
-                productions_.push_back(typename token_vector::
-                    value_type(iter_->id, iter_->first, iter_->second));
+                productions_.emplace_back(iter_->id, iter_->first,
+                    iter_->second);
 
                 if (results_.token_id != 0)
                 {
@@ -430,6 +428,9 @@ namespace parsertl
 
                 break;
             }
+            default:
+                // action::error
+                break;
             }
         }
 
@@ -442,8 +443,6 @@ namespace parsertl
             {
                 switch (results_.entry.action)
                 {
-                case action::error:
-                    break;
                 case action::shift:
                     results_.stack.push_back(results_.entry.param);
 
@@ -494,6 +493,9 @@ namespace parsertl
                     results_.entry =
                         sm_.at(results_.stack.back(), results_.token_id);
                     break;
+                default:
+                    // action::error
+                    break;
                 }
 
                 if (results_.entry.action == action::accept)
@@ -522,12 +524,10 @@ namespace parsertl
             {
                 switch (results_.entry.action)
                 {
-                case action::error:
-                    break;
                 case action::shift:
                     results_.stack.push_back(results_.entry.param);
-                    productions_.push_back(typename token_vector::
-                        value_type(iter_->id, iter_->first, iter_->second));
+                    productions_.emplace_back(iter_->id, iter_->first,
+                        iter_->second);
 
                     if (results_.token_id != 0)
                     {
@@ -597,6 +597,8 @@ namespace parsertl
                         sm_.at(results_.stack.back(), results_.token_id);
                     break;
                 default:
+                    // action::accept
+                    // action::error
                     break;
                 }
 

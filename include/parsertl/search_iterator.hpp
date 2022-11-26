@@ -1,5 +1,5 @@
 // iterator.hpp
-// Copyright (c) 2018 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2018-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -36,8 +36,8 @@ namespace parsertl
             _lsm(&lsm_),
             _gsm(&gsm_)
         {
-            _captures.push_back(std::vector<std::pair<iter, iter>>());
-            _captures.back().push_back(std::make_pair(first_, first_));
+            _captures.emplace_back();
+            _captures.back().emplace_back(first_, first_);
             lookup();
         }
 

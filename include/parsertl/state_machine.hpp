@@ -1,5 +1,5 @@
 // state_machine.hpp
-// Copyright (c) 2014-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2014-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -144,8 +144,7 @@ namespace parsertl
                 });
 
             if (iter_ == s_.end())
-                s_.push_back(std::make_pair(static_cast<id_type>
-                    (token_id_), entry_));
+                s_.emplace_back(static_cast<id_type>(token_id_), entry_);
             else
                 iter_->second = entry_;
         }

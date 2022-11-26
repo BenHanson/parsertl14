@@ -1,5 +1,5 @@
 // read_bison.hpp
-// Copyright (c) 2014-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2014-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -135,9 +135,8 @@ namespace parsertl
         while (results_.entry.action != action::error &&
             results_.entry.action != action::accept)
         {
-            switch (results_.entry.action)
+            if (results_.entry.action == action::reduce)
             {
-            case action::reduce:
                 if (results_.entry.param == token_index_)
                 {
                     const token& token_ =
@@ -195,8 +194,6 @@ namespace parsertl
 
                     rules_.push(lhs_str_.c_str(), rhs_str_.c_str());
                 }
-
-                break;
             }
 
             lookup(gsm_, iter_, results_, productions_);

@@ -1,5 +1,5 @@
 // rules.hpp
-// Copyright (c) 2014-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2014-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -26,14 +26,8 @@ namespace parsertl
 
         struct nt_location
         {
-            std::size_t _first_production;
-            std::size_t _last_production;
-
-            nt_location() :
-                _first_production(static_cast<std::size_t>(~0)),
-                _last_production(static_cast<std::size_t>(~0))
-            {
-            }
+            std::size_t _first_production = static_cast<std::size_t>(~0);
+            std::size_t _last_production = static_cast<std::size_t>(~0);
         };
 
         using capture_vector = std::vector<std::pair<id_type, id_type>>;
@@ -80,19 +74,15 @@ namespace parsertl
 
         struct production
         {
-            std::size_t _lhs;
+            std::size_t _lhs = static_cast<std::size_t>(~0);
             std::pair<symbol_vector, string> _rhs;
-            std::size_t _precedence;
-            associativity _associativity;
+            std::size_t _precedence = 0;
+            associativity _associativity = associativity::token_assoc;
             std::size_t _index;
-            std::size_t _next_lhs;
+            std::size_t _next_lhs = static_cast<std::size_t>(~0);
 
-            production(const std::size_t index_) :
-                _lhs(static_cast<std::size_t>(~0)),
-                _precedence(0),
-                _associativity(associativity::token_assoc),
-                _index(index_),
-                _next_lhs(static_cast<std::size_t>(~0))
+            explicit production(const std::size_t index_) :
+                _index(index_)
             {
             }
 
@@ -131,9 +121,8 @@ namespace parsertl
 
         using token_info_vector = std::vector<token_info>;
 
-        basic_rules(const std::size_t flags_ = 0) :
-            _flags(flags_),
-            _next_precedence(1)
+        explicit basic_rules(const std::size_t flags_ = 0) :
+            _flags(flags_)
         {
             lexer_rules rules_;
 
@@ -331,7 +320,7 @@ namespace parsertl
                     {
                     case ebnf_indexes::rhs_or_2_idx:
                     {
-                        // rhs_or: rhs_or '|' opt_list;
+                        // rhs_or: rhs_or '|' opt_list
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;
@@ -353,12 +342,12 @@ namespace parsertl
                         break;
                     }
                     case ebnf_indexes::opt_list_1_idx:
-                        // opt_list: ;
+                        // opt_list: %empty
                         rhs_stack_.push(string());
                         break;
                     case ebnf_indexes::opt_list_3_idx:
                     {
-                        // opt_list: rhs_list opt_prec;
+                        // opt_list: rhs_list opt_prec
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;
@@ -377,7 +366,7 @@ namespace parsertl
                     }
                     case ebnf_indexes::rhs_list_2_idx:
                     {
-                        // rhs_list: rhs_list rhs;
+                        // rhs_list: rhs_list rhs
                         string r_ = rhs_stack_.top();
 
                         rhs_stack_.pop();
@@ -388,9 +377,9 @@ namespace parsertl
                     case ebnf_indexes::identifier_idx:
                     case ebnf_indexes::terminal_idx:
                     {
-                        // opt_list: %empty;
-                        // rhs: IDENTIFIER;
-                        // rhs: TERMINAL;
+                        // opt_list: %empty
+                        // rhs: IDENTIFIER
+                        // rhs: TERMINAL
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;
@@ -402,8 +391,8 @@ namespace parsertl
                     case ebnf_indexes::optional_1_idx:
                     case ebnf_indexes::optional_2_idx:
                     {
-                        // rhs: '[' rhs_or ']';
-                        // rhs: rhs '?';
+                        // rhs: '[' rhs_or ']'
+                        // rhs: rhs '?'
                         std::size_t& counter_ = _new_rule_ids[lhs_];
                         std::basic_ostringstream<char_type> ss_;
                         std::pair<string, string> pair_;
@@ -420,8 +409,8 @@ namespace parsertl
                     case ebnf_indexes::zom_1_idx:
                     case ebnf_indexes::zom_2_idx:
                     {
-                        // rhs: '{' rhs_or '}';
-                        // rhs: rhs '*';
+                        // rhs: '{' rhs_or '}'
+                        // rhs: rhs '*'
                         std::size_t& counter_ = _new_rule_ids[lhs_];
                         std::basic_ostringstream<char_type> ss_;
                         std::pair<string, string> pair_;
@@ -439,8 +428,8 @@ namespace parsertl
                     case ebnf_indexes::oom_1_idx:
                     case ebnf_indexes::oom_2_idx:
                     {
-                        // rhs: '{' rhs_or '}' '-';
-                        // rhs: rhs '+';
+                        // rhs: '{' rhs_or '}' '-'
+                        // rhs: rhs '+'
                         std::size_t& counter_ = _new_rule_ids[lhs_];
                         std::basic_ostringstream<char_type> ss_;
                         std::pair<string, string> pair_;
@@ -457,7 +446,7 @@ namespace parsertl
                     }
                     case ebnf_indexes::bracketed_idx:
                     {
-                        // rhs: '(' rhs_or ')';
+                        // rhs: '(' rhs_or ')'
                         std::size_t& counter_ = _new_rule_ids[lhs_];
                         std::basic_ostringstream<char_type> ss_;
                         std::pair<string, string> pair_;
@@ -484,8 +473,8 @@ namespace parsertl
                     case ebnf_indexes::prec_ident_idx:
                     case ebnf_indexes::prec_term_idx:
                     {
-                        // opt_prec: PREC IDENTIFIER;
-                        // opt_prec: PREC TERMINAL;
+                        // opt_prec: PREC IDENTIFIER
+                        // opt_prec: PREC TERMINAL
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;
@@ -564,7 +553,7 @@ namespace parsertl
             _start = start_;
         }
 
-        const size_t start() const
+        size_t start() const
         {
             return _start.empty() ?
                 npos() :
@@ -649,15 +638,15 @@ namespace parsertl
                 string rhs_ = _start;
 
                 push_production(accept_, rhs_);
-                _grammar.back()._rhs.first.push_back(symbol(symbol::
-                    type::TERMINAL, insert_terminal(string(1, '$'))));
+                _grammar.back()._rhs.first.emplace_back(symbol::type::TERMINAL,
+                    insert_terminal(string(1, '$')));
                 _start = accept_;
             }
             /*        else
                     {
                         _grammar[_nt_locations[start_]._first_production].
-                            _rhs.first.push_back(symbol(symbol::TERMINAL,
-                                insert_terminal(string(1, '$'))));
+                            _rhs.first.emplace_back(symbol::TERMINAL,
+                                insert_terminal(string(1, '$')));
 
                         for (const auto &p_ : _grammar)
                         {
@@ -679,7 +668,7 @@ namespace parsertl
                         }
                     }*/
 
-                    // Validate all non-terminals.
+            // Validate all non-terminals.
             for (std::size_t i_ = 0, size_ = _nt_locations.size();
                 i_ < size_; ++i_)
             {
@@ -785,7 +774,7 @@ namespace parsertl
 
         std::size_t _flags;
         ebnf_tables _ebnf_tables;
-        std::size_t _next_precedence;
+        std::size_t _next_precedence = 1;
         lexer_state_machine _rule_lexer;
         lexer_state_machine _token_lexer;
         string_id_type_map _terminals;
@@ -808,7 +797,7 @@ namespace parsertl
             return _tokens_info[id_];
         }
 
-        string name_from_id(const std::size_t id_)
+        string name_from_id(const std::size_t id_) const
         {
             string name_;
 
@@ -829,7 +818,7 @@ namespace parsertl
         {
             lexer_iterator end_;
             string token_;
-            std::size_t id_ = static_cast<std::size_t>(~0);
+            auto id_ = static_cast<std::size_t>(~0);
 
             for (; iter_ != end_; ++iter_)
             {
@@ -944,10 +933,9 @@ namespace parsertl
                         ++brackets_;
                         ++curr_bracket_;
                         bracket_stack_.push(curr_bracket_);
-                        _captures.back().second.push_back(std::
-                            make_pair(static_cast<id_type>(production_.
-                                _rhs.first.size()),
-                                static_cast<id_type>(0)));
+                        _captures.back().second.emplace_back(static_cast
+                            <id_type>(production_._rhs.first.size()),
+                                static_cast<id_type>(0));
                         break;
                     case ')':
                         --brackets_;
@@ -982,6 +970,8 @@ namespace parsertl
                         production_._index = index_;
                         break;
                     }
+                    default:
+                        break;
                     }
                 }
                 else if (results_.entry.action == action::reduce)
@@ -990,7 +980,7 @@ namespace parsertl
                     {
                     case ebnf_indexes::identifier_idx:
                     {
-                        // rhs: IDENTIFIER;
+                        // rhs: IDENTIFIER
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;
@@ -1004,8 +994,8 @@ namespace parsertl
 
                             // NON_TERMINAL
                             location(id_);
-                            production_._rhs.first.push_back(symbol(symbol::
-                                type::NON_TERMINAL, id_));
+                            production_._rhs.first.
+                                emplace_back(symbol::type::NON_TERMINAL, id_);
                         }
                         else
                         {
@@ -1021,14 +1011,14 @@ namespace parsertl
                             }
 
                             production_._rhs.first.
-                                push_back(symbol(symbol::type::TERMINAL, id_));
+                                emplace_back(symbol::type::TERMINAL, id_);
                         }
 
                         break;
                     }
                     case ebnf_indexes::terminal_idx:
                     {
-                        // rhs: TERMINAL;
+                        // rhs: TERMINAL
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;
@@ -1043,15 +1033,15 @@ namespace parsertl
                                 token_info_._associativity;
                         }
 
-                        production_._rhs.first.push_back(symbol(symbol::
-                            type::TERMINAL, id_));
+                        production_._rhs.first.
+                            emplace_back(symbol::type::TERMINAL, id_);
                         break;
                     }
                     case ebnf_indexes::prec_ident_idx:
                     case ebnf_indexes::prec_term_idx:
                     {
-                        // opt_prec: PREC IDENTIFIER;
-                        // opt_prec: PREC TERMINAL;
+                        // opt_prec: PREC IDENTIFIER
+                        // opt_prec: PREC TERMINAL
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;

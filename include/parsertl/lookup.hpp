@@ -1,5 +1,5 @@
 // lookup.hpp
-// Copyright (c) 2017-2020 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2017-2023 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -18,8 +18,6 @@ namespace parsertl
     {
         switch (results_.entry.action)
         {
-        case action::error:
-            break;
         case action::shift:
             results_.stack.push_back(results_.entry.param);
 
@@ -74,6 +72,9 @@ namespace parsertl
 
             break;
         }
+        default:
+            // action::error
+            break;
         }
     }
 
@@ -84,12 +85,9 @@ namespace parsertl
     {
         switch (results_.entry.action)
         {
-        case action::error:
-            break;
         case action::shift:
             results_.stack.push_back(results_.entry.param);
-            productions_.push_back(typename token_vector::value_type(iter_->id,
-                iter_->first, iter_->second));
+            productions_.emplace_back(iter_->id, iter_->first, iter_->second);
 
             if (results_.token_id != 0)
             {
@@ -159,6 +157,9 @@ namespace parsertl
 
             break;
         }
+        default:
+            // action::error
+            break;
         }
     }
 }
