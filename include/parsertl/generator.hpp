@@ -946,9 +946,11 @@ namespace parsertl
     };
 
     using generator = basic_generator<rules, state_machine>;
-    using uncompressed_generator = basic_generator<rules, uncompressed_state_machine>;
+    using uncompressed_generator =
+        basic_generator<rules, uncompressed_state_machine>;
     using wgenerator = basic_generator<wrules, state_machine>;
-    using wuncompressed_generator = basic_generator<wrules, uncompressed_state_machine>;
+    using wuncompressed_generator =
+        basic_generator<wrules, uncompressed_state_machine>;
 }
 
 #endif

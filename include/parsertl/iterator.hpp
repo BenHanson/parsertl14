@@ -12,34 +12,41 @@
 
 namespace parsertl
 {
-    template<typename iter, typename lsm_type, typename gsm_type,
+    template<typename lexer_iterator, typename sm_type,
         typename id_type = std::uint16_t>
-        class iterator
+    class iterator
     {
     public:
-        using results = basic_match_results<gsm_type>;
+        using results = basic_match_results<sm_type>;
         using value_type = results;
         using difference_type = ptrdiff_t;
         using pointer = const value_type*;
         using reference = const value_type&;
         using iterator_category = std::forward_iterator_tag;
 
-        using lex_iterator = lexertl::iterator<iter, lsm_type,
-            lexertl::match_results<iter>>;
         // Qualify token to prevent arg dependant lookup
-        using token = parsertl::token<lex_iterator>;
+        using token = parsertl::token<lexer_iterator>;
         using token_vector = typename token::token_vector;
 
-        iterator() :
-            _gsm(nullptr)
+        iterator() = default;
+
+        iterator(const lexer_iterator& iter_, const sm_type& sm_) :
+            _iter(iter_),
+            _results(_iter->id, sm_),
+            _sm(&sm_)
         {
+            // The first action can only ever be reduce
+            // if the grammar treats no input as valid.
+            if (_results.entry.action != action::reduce)
+                lookup();
         }
 
-        iterator(const iter& first_, const iter& second_,
-            const lsm_type& lsm_, const gsm_type& gsm_) :
-            _iter(first_, second_, lsm_),
-            _results(_iter->id, gsm_),
-            _gsm(&gsm_)
+        iterator(const lexer_iterator& iter_, const sm_type& sm_,
+            const std::size_t reserved_) :
+            _iter(iter_),
+            _results(_iter->id, sm_, reserved_),
+            _productions(reserved_),
+            _sm(&sm_)
         {
             // The first action can only ever be reduce
             // if the grammar treats no input as valid.
@@ -49,7 +56,7 @@ namespace parsertl
 
         typename token_vector::value_type dollar(const std::size_t index_) const
         {
-            return _results.dollar(*_gsm, index_, _productions);
+            return _results.dollar(index_, *_sm, _productions);
         }
 
         iterator& operator ++()
@@ -78,8 +85,8 @@ namespace parsertl
 
         bool operator ==(const iterator& rhs_) const
         {
-            return _gsm == rhs_._gsm &&
-                (_gsm == nullptr ? true :
+            return _sm == rhs_._sm &&
+                (_sm == nullptr ? true :
                     _results == rhs_._results);
         }
 
@@ -89,17 +96,17 @@ namespace parsertl
         }
 
     private:
-        lex_iterator _iter;
-        basic_match_results<gsm_type> _results;
+        lexer_iterator _iter;
+        basic_match_results<sm_type> _results;
         token_vector _productions;
-        const gsm_type* _gsm;
+        const sm_type* _sm = nullptr;
 
         void lookup()
         {
             // do while because we need to move past the current reduce action
             do
             {
-                parsertl::lookup(*_gsm, _iter, _results, _productions);
+                parsertl::lookup(_iter, *_sm, _results, _productions);
             } while (_results.entry.action == action::shift ||
                 _results.entry.action == action::go_to);
 
@@ -107,7 +114,7 @@ namespace parsertl
             {
             case action::accept:
             case action::error:
-                _gsm = nullptr;
+                _sm = nullptr;
                 break;
             default:
                 break;
@@ -115,14 +122,10 @@ namespace parsertl
         }
     };
 
-    using siterator = iterator<std::string::const_iterator,
-        lexertl::state_machine, state_machine>;
-    using citerator = iterator<const char*, lexertl::state_machine,
-        state_machine>;
-    using wsiterator = iterator<std::wstring::const_iterator,
-        lexertl::wstate_machine, state_machine>;
-    using wciterator = iterator<const wchar_t*, lexertl::wstate_machine,
-        state_machine>;
+    using siterator = iterator<lexertl::siterator, state_machine>;
+    using citerator = iterator<lexertl::citerator, state_machine>;
+    using wsiterator = iterator<lexertl::wsiterator, state_machine>;
+    using wciterator = iterator<lexertl::wciterator, state_machine>;
 }
 
 #endif

@@ -13,42 +13,33 @@
 namespace parsertl
 {
     // Parse entire sequence and return boolean
-    template<typename iterator, typename sm_type, typename lsm>
-    bool match(iterator begin_, iterator end_, const lsm& lsm_,
-        const sm_type& gsm_)
+    template<typename lexer_iterator, typename sm_type>
+    bool match(lexer_iterator iter_, const sm_type& sm_)
     {
-        using lex_iterator = lexertl::iterator<iterator, lsm,
-            lexertl::match_results<iterator>>;
-        lex_iterator iter_(begin_, end_, lsm_);
-        basic_match_results<sm_type> results_(iter_->id, gsm_);
+        basic_match_results<sm_type> results_(iter_->id, sm_);
 
-        return parse(gsm_, iter_, results_);
+        return parse(iter_, sm_, results_);
     }
 
-    template<typename iterator, typename captures, typename sm_type,
-        typename lsm>
-        bool match(iterator begin_, iterator end_, captures& captures_,
-            lsm& lsm_, const sm_type& gsm_)
+    template<typename lexer_iterator, typename sm_type, typename captures>
+    bool match(lexer_iterator iter_, const sm_type& sm_, captures& captures_)
     {
-        using lex_iterator = lexertl::iterator<iterator, lsm,
-            lexertl::match_results<iterator>>;
-        lex_iterator iter_(begin_, end_, lsm_);
-        basic_match_results<sm_type> results_(iter_->id, gsm_);
+        basic_match_results<sm_type> results_(iter_->id, sm_);
         // Qualify token to prevent arg dependant lookup
-        using token = parsertl::token<lex_iterator>;
+        using token = parsertl::token<lexer_iterator>;
         typename token::token_vector productions_;
 
         captures_.clear();
-        captures_.resize(gsm_._captures.back().first +
-            gsm_._captures.back().second.size() + 1);
-        captures_[0].emplace_back(begin_, end_);
+        captures_.resize(sm_._captures.back().first +
+            sm_._captures.back().second.size() + 1);
+        captures_[0].emplace_back(iter_->first, iter_->second);
 
         while (results_.entry.action != action::error &&
             results_.entry.action != action::accept)
         {
             if (results_.entry.action == action::reduce)
             {
-                const auto& row_ = gsm_._captures[results_.entry.param];
+                const auto& row_ = sm_._captures[results_.entry.param];
 
                 if (!row_.second.empty())
                 {
@@ -57,9 +48,9 @@ namespace parsertl
                     for (const auto& pair_ : row_.second)
                     {
                         const auto& token1_ = results_.
-                            dollar(gsm_, pair_.first, productions_);
+                            dollar(pair_.first, sm_, productions_);
                         const auto& token2_ = results_.
-                            dollar(gsm_, pair_.second, productions_);
+                            dollar(pair_.second, sm_, productions_);
                         auto& entry_ = captures_[row_.first + index_ + 1];
 
                         entry_.emplace_back(token1_.first, token2_.second);
@@ -68,7 +59,7 @@ namespace parsertl
                 }
             }
 
-            lookup(gsm_, iter_, results_, productions_);
+            lookup(iter_, sm_, results_, productions_);
         }
 
         return results_.entry.action == action::accept;

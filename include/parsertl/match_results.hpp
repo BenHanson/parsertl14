@@ -27,9 +27,22 @@ namespace parsertl
             entry.param = static_cast<id_type>(error_type::unknown_token);
         }
 
+        basic_match_results(const std::size_t reserved_) :
+            stack(reserved_)
+        {
+            basic_match_results();
+        }
+
         basic_match_results(const id_type token_id_, const sm_type& sm_)
         {
             reset(token_id_, sm_);
+        }
+
+        basic_match_results(const id_type token_id_, const sm_type& sm_,
+            const std::size_t reserved_) :
+            stack(reserved_)
+        {
+            basic_match_results(token_id_, sm_);
         }
 
         void clear()
@@ -68,8 +81,8 @@ namespace parsertl
         }
 
         template<typename token_vector>
-        typename token_vector::value_type& dollar(const sm_type& sm_,
-            const std::size_t index_, token_vector& productions) const
+        typename token_vector::value_type& dollar(const std::size_t index_,
+            const sm_type& sm_, token_vector& productions) const
         {
             if (entry.action != action::reduce)
             {
@@ -81,8 +94,8 @@ namespace parsertl
         }
 
         template<typename token_vector>
-        const typename token_vector::value_type& dollar(const sm_type& sm_,
-            const std::size_t index_, const token_vector& productions) const
+        const typename token_vector::value_type& dollar(const std::size_t index_,
+            const sm_type& sm_, const token_vector& productions) const
         {
             if (entry.action != action::reduce)
             {
@@ -101,12 +114,15 @@ namespace parsertl
 
         bool operator ==(const basic_match_results& rhs_) const
         {
-            return stack == rhs_.stack && token_id == rhs_.token_id && entry == rhs_.entry;
+            return stack == rhs_.stack &&
+                token_id == rhs_.token_id &&
+                entry == rhs_.entry;
         }
     };
 
     using match_results = basic_match_results<state_machine>;
-    using uncompressed_match_results = basic_match_results<uncompressed_state_machine>;
+    using uncompressed_match_results =
+        basic_match_results<uncompressed_state_machine>;
 }
 
 #endif

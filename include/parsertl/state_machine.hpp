@@ -208,7 +208,8 @@ namespace parsertl
     };
 
     using state_machine = basic_state_machine<uint16_t>;
-    using uncompressed_state_machine = basic_uncompressed_state_machine<uint16_t>;
+    using uncompressed_state_machine =
+        basic_uncompressed_state_machine<uint16_t>;
 }
 
 #endif

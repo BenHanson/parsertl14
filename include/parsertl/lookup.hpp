@@ -12,8 +12,8 @@
 namespace parsertl
 {
     // parse sequence but do not keep track of productions
-    template<typename sm_type, typename iterator>
-    void lookup(const sm_type& sm_, iterator& iter_,
+    template<typename lexer_iterator, typename sm_type>
+    void lookup(lexer_iterator& iter_, const sm_type& sm_,
         basic_match_results<sm_type>& results_)
     {
         switch (results_.entry.action)
@@ -28,7 +28,7 @@ namespace parsertl
 
             results_.token_id = iter_->id;
 
-            if (results_.token_id == iterator::value_type::npos())
+            if (results_.token_id == lexer_iterator::value_type::npos())
             {
                 results_.entry.action = action::error;
                 results_.entry.param = static_cast<typename sm_type::id_type>
@@ -79,8 +79,8 @@ namespace parsertl
     }
 
     // Parse sequence and maintain production vector
-    template<typename sm_type, typename iterator, typename token_vector>
-    void lookup(const sm_type& sm_, iterator& iter_,
+    template<typename lexer_iterator, typename sm_type, typename token_vector>
+    void lookup(lexer_iterator& iter_, const sm_type& sm_,
         basic_match_results<sm_type>& results_, token_vector& productions_)
     {
         switch (results_.entry.action)
@@ -96,7 +96,7 @@ namespace parsertl
 
             results_.token_id = iter_->id;
 
-            if (results_.token_id == iterator::value_type::npos())
+            if (results_.token_id == lexer_iterator::value_type::npos())
             {
                 results_.entry.action = action::error;
                 results_.entry.param = static_cast<typename sm_type::id_type>
