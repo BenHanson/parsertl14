@@ -36,7 +36,7 @@ int main()
         using capture_vector = std::vector<std::pair<const char *, const char *>>;
         std::vector<capture_vector> captures;
 
-        if (parsertl::match(iter captures, gsm))
+        if (parsertl::match(iter, captures, gsm))
         {
             auto cvi = captures.cbegin();
             auto cve = captures.cend();
