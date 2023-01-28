@@ -36,7 +36,7 @@ int main()
         using capture_vector = std::vector<std::pair<const char *, const char *>>;
         std::vector<capture_vector> captures;
 
-        if (parsertl::match(iter, captures, gsm))
+        if (parsertl::match(iter, gsm, captures)
         {
             auto cvi = captures.cbegin();
             auto cve = captures.cend();
@@ -76,7 +76,7 @@ Four
 
 To search a string with captures, switch `match()` for `search()` above:
 ```cpp
-parsertl::search(input.c_str(), input.c_str() + input.size(), captures, lsm, gsm)
+parsertl::search(iter, gsm, captures)
 ```
 The `captures` argument can be omitted if it is not required in both cases.
 
