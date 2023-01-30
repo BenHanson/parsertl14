@@ -7,6 +7,7 @@ As well as normal parsing, it is now possible to use the library as a more power
 
 ```cpp
 #include <parsertl/generator.hpp>
+#include <lexertl/iterator.hpp>
 #include <iostream>
 #include <parsertl/match.hpp>
 
@@ -31,10 +32,11 @@ int main()
         lexertl::generator::build(lrules, lsm);
 
         std::string input = "One, 2, Three, Four";
+        lexertl::citerator iter(input.c_str(), input.c_str() + input.size(), lsm);
         using capture_vector = std::vector<std::pair<const char *, const char *>>;
         std::vector<capture_vector> captures;
 
-        if (parsertl::match(input.c_str(), input.c_str() + input.size(), captures, lsm, gsm))
+        if (parsertl::match(iter, gsm, captures)
         {
             auto cvi = captures.cbegin();
             auto cve = captures.cend();
@@ -74,14 +76,15 @@ Four
 
 To search a string with captures, switch `match()` for `search()` above:
 ```cpp
-parsertl::search(input.c_str(), input.c_str() + input.size(), captures, lsm, gsm)
+parsertl::search(iter, gsm, captures)
 ```
 The `captures` argument can be omitted if it is not required in both cases.
 
 You can use an iterator instead of calling search:
 
 ```cpp
-    parsertl::csearch_iterator iter(input.c_str(), input.c_str() + input.size(), lsm, gsm);
+    lexertl::citerator liter(input.c_str(), input.c_str() + input.size(), lsm);
+    parsertl::csearch_iterator iter(liter, gsm);
     parsertl::csearch_iterator end;
 
     for (; iter != end; ++iter)
