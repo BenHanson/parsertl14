@@ -41,7 +41,7 @@ namespace parsertl
     }
 
     template<typename lexer_iterator, typename sm_type, typename captures>
-    bool search(lexer_iterator iter_, lexer_iterator end_, const sm_type& sm_,
+    bool search(lexer_iterator& iter_, lexer_iterator& end_, const sm_type& sm_,
         captures& captures_)
     {
         basic_match_results<sm_type> results_(iter_->id, sm_);
