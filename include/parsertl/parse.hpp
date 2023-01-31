@@ -23,10 +23,8 @@ namespace parsertl
             case action::shift:
                 results_.stack.push_back(results_.entry.param);
 
-                if (results_.token_id != 0)
-                {
+                if (iter_->id != 0)
                     ++iter_;
-                }
 
                 results_.token_id = iter_->id;
 
