@@ -200,7 +200,7 @@ namespace parsertl
         }
 
         if (results_.entry.action == action::error)
-            throw std::runtime_error("Syntax error");
+            throw runtime_error("Syntax error");
     }
 }
 
