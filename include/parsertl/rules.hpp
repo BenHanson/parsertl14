@@ -541,6 +541,38 @@ namespace parsertl
             return iter_->second;
         }
 
+        string name_from_token_id(const std::size_t id_) const
+        {
+            string name_;
+
+            for (const auto& pair_ : _terminals)
+            {
+                if (pair_.second == id_)
+                {
+                    name_ = pair_.first;
+                    break;
+                }
+            }
+
+            return name_;
+        }
+
+        string name_from_nt_id(const std::size_t id_) const
+        {
+            string name_;
+
+            for (const auto& pair_ : _non_terminals)
+            {
+                if (pair_.second == id_)
+                {
+                    name_ = pair_.first;
+                    break;
+                }
+            }
+
+            return name_;
+        }
+
         void start(const char_type* start_)
         {
             validate(start_);
@@ -574,7 +606,7 @@ namespace parsertl
             {
                 const std::size_t id_ = _grammar[0]._lhs;
 
-                _start = name_from_id(id_);
+                _start = name_from_nt_id(id_);
 
                 if (!_start.empty())
                     start_ = id_;
@@ -656,7 +688,7 @@ namespace parsertl
                                     s_._id == start_)
                                 {
                                     std::ostringstream ss_;
-                                    const string name_ = name_from_id(p_._lhs);
+                                    const string name_ = name_from_nt_id(p_._lhs);
 
                                     ss_ << "The start symbol occurs on the "
                                         "RHS of rule '";
@@ -675,7 +707,7 @@ namespace parsertl
                 if (_nt_locations[i_]._first_production == npos())
                 {
                     std::ostringstream ss_;
-                    const string name_ = name_from_id(i_);
+                    const string name_ = name_from_nt_id(i_);
 
                     ss_ << "Non-terminal '";
                     narrow(name_.c_str(), ss_);
@@ -702,12 +734,18 @@ namespace parsertl
 
         void terminals(string_vector& vec_) const
         {
+            vec_.clear();
             vec_.resize(_terminals.size());
 
             for (const auto& pair_ : _terminals)
             {
                 vec_[pair_.second] = pair_.first;
             }
+        }
+
+        std::size_t terminals_count() const
+        {
+            return _terminals.size();
         }
 
         void non_terminals(string_vector& vec_) const
@@ -722,8 +760,14 @@ namespace parsertl
             }
         }
 
+        std::size_t non_terminals_count() const
+        {
+            return _non_terminals.size();
+        }
+
         void symbols(string_vector& vec_) const
         {
+            vec_.clear();
             terminals(vec_);
             non_terminals(vec_);
         }
@@ -795,22 +839,6 @@ namespace parsertl
             }
 
             return _tokens_info[id_];
-        }
-
-        string name_from_id(const std::size_t id_) const
-        {
-            string name_;
-
-            for (const auto& pair_ : _non_terminals)
-            {
-                if (pair_.second == id_)
-                {
-                    name_ = pair_.first;
-                    break;
-                }
-            }
-
-            return name_;
         }
 
         void token(lexer_iterator& iter_, const std::size_t precedence_,
