@@ -578,7 +578,7 @@ namespace parsertl
             {
                 sm_._rules.emplace_back();
 
-                typename sm::id_type_pair& pair_ = sm_._rules.back();
+                typename sm::id_type_vector_pair& pair_ = sm_._rules.back();
 
                 pair_.first = static_cast<id_type>(terminals_ +
                     production_._lhs);

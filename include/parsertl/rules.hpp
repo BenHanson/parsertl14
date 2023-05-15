@@ -688,7 +688,8 @@ namespace parsertl
                                     s_._id == start_)
                                 {
                                     std::ostringstream ss_;
-                                    const string name_ = name_from_nt_id(p_._lhs);
+                                    const string name_ =
+                                        name_from_nt_id(p_._lhs);
 
                                     ss_ << "The start symbol occurs on the "
                                         "RHS of rule '";
