@@ -212,7 +212,17 @@ namespace parsertl
         }
 
         if (results_.entry.action == action::error)
-            throw runtime_error("Syntax error");
+        {
+            std::ostringstream ss_;
+            string token_ = iter_->str();
+
+            ss_ << "Syntax error on line " <<
+                std::count(start_, iter_->first, '\n') + 1 <<
+                ": '";
+            narrow(token_.c_str(), ss_);
+            ss_ << '\'';
+            throw runtime_error(ss_.str());
+        }
     }
 }
 
