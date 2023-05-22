@@ -70,6 +70,8 @@ namespace parsertl
                 case rules::associativity::right_assoc:
                     right(stream_);
                     break;
+                default:
+                    break;
                 }
 
                 stream_ << pair_.second << static_cast<char_type>('\n');

@@ -131,8 +131,10 @@ namespace parsertl
                 R"('(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^'])+'|)"
                 R"(["](\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^"])+["])");
             rules_.insert_macro("IDENTIFIER", "[A-Za-z_.][-A-Za-z_.0-9]*");
-            rules_.push("{TERMINAL}", ebnf_tables::TERMINAL);
-            rules_.push("{IDENTIFIER}", ebnf_tables::IDENTIFIER);
+            rules_.push("{TERMINAL}",
+                static_cast<uint16_t>(ebnf_tables::yytokentype::TERMINAL));
+            rules_.push("{IDENTIFIER}",
+                static_cast<uint16_t>(ebnf_tables::yytokentype::IDENTIFIER));
             rules_.push("\\s+", rules_.skip());
             lexer_generator::build(rules_, _token_lexer);
 
@@ -147,8 +149,10 @@ namespace parsertl
             rules_.push("[+]", '+');
             rules_.push("[(]", '(');
             rules_.push("[)]", ')');
-            rules_.push("%empty", ebnf_tables::EMPTY);
-            rules_.push("%prec", ebnf_tables::PREC);
+            rules_.push("%empty",
+                static_cast<uint16_t>(ebnf_tables::yytokentype::EMPTY));
+            rules_.push("%prec",
+                static_cast<uint16_t>(ebnf_tables::yytokentype::PREC));
             rules_.push("[/][*].{+}[\r\n]*?[*][/]|[/][/].*", rules_.skip());
             lexer_generator::build(rules_, _rule_lexer);
 

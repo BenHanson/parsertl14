@@ -107,7 +107,7 @@ namespace parsertl
                 stream_ >> num_;
                 pair_.first = static_cast<id_type>(num_);
                 stream_ >> num_;
-                pair_.second = static_cast<id_type>(num_);;
+                pair_.second = static_cast<id_type>(num_);
             }
         }
 
