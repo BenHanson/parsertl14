@@ -145,7 +145,7 @@ namespace parsertl
                                 symbols_[terminals_ + lhs_iter_->_lhs];
 
                             lhs_iter_ = grammar_.begin() + index_;
-                            stream_ << static_cast <char_type>('\n');
+                            stream_ << static_cast<char_type>('\n');
 
                             for (std::size_t i_ = 0, size_ = lhs_.size();
                                 i_ < size_; ++i_)
@@ -190,12 +190,12 @@ namespace parsertl
                     const production& p_ = grammar_[pair_.first];
                     std::size_t j_ = 0;
 
-                    stream_ << static_cast < char_type>(' ') <<
-                        static_cast <char_type>(' ') <<
+                    stream_ << static_cast<char_type>(' ') <<
+                        static_cast<char_type>(' ') <<
                         symbols_[terminals_ + p_._lhs] <<
-                        static_cast <char_type>(' ') <<
-                        static_cast <char_type>('-') <<
-                        static_cast <char_type>('>');
+                        static_cast<char_type>(' ') <<
+                        static_cast<char_type>('-') <<
+                        static_cast<char_type>('>');
 
                     for (; j_ < p_._rhs.size(); ++j_)
                     {
@@ -206,39 +206,39 @@ namespace parsertl
 
                         if (j_ == pair_.second)
                         {
-                            stream_ << static_cast <char_type>(' ') <<
-                                static_cast <char_type>('.');
+                            stream_ << static_cast<char_type>(' ') <<
+                                static_cast<char_type>('.');
                         }
 
-                        stream_ << static_cast <char_type>(' ') <<
+                        stream_ << static_cast<char_type>(' ') <<
                             symbols_[id_];
                     }
 
                     if (j_ == pair_.second)
                     {
-                        stream_ << static_cast <char_type>(' ') <<
-                            static_cast <char_type>('.');
+                        stream_ << static_cast<char_type>(' ') <<
+                            static_cast<char_type>('.');
                     }
 
-                    stream_ << static_cast <char_type>('\n');
+                    stream_ << static_cast<char_type>('\n');
                 }
 
                 if (!state_._transitions.empty())
-                    stream_ << static_cast <char_type>('\n');
+                    stream_ << static_cast<char_type>('\n');
 
                 for (const auto& pair_ : state_._transitions)
                 {
-                    stream_ << static_cast <char_type>(' ') <<
-                        static_cast <char_type>(' ') <<
+                    stream_ << static_cast<char_type>(' ') <<
+                        static_cast<char_type>(' ') <<
                         symbols_[pair_.first] <<
-                        static_cast <char_type>(' ') <<
-                        static_cast <char_type>('-') <<
-                        static_cast <char_type>('>') <<
-                        static_cast <char_type>(' ') << pair_.second <<
-                        static_cast <char_type>('\n');
+                        static_cast<char_type>(' ') <<
+                        static_cast<char_type>('-') <<
+                        static_cast<char_type>('>') <<
+                        static_cast<char_type>(' ') << pair_.second <<
+                        static_cast<char_type>('\n');
                 }
 
-                stream_ << static_cast <char_type>('\n');
+                stream_ << static_cast<char_type>('\n');
             }
         }
 
