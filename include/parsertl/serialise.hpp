@@ -6,6 +6,7 @@
 #ifndef PARSERTL_SERIALISE_HPP
 #define PARSERTL_SERIALISE_HPP
 
+#include "runtime_error.hpp"
 #include "../../../lexertl14/include/lexertl/serialise.hpp"
 #include "state_machine.hpp"
 

@@ -8,6 +8,7 @@
 
 #include "bison_lookup.hpp"
 #include "ebnf_tables.hpp"
+#include "enum_operator.h"
 #include "enums.hpp"
 #include "../../../lexertl14/include/lexertl/generator.hpp"
 #include "../../../lexertl14/include/lexertl/iterator.hpp"
@@ -462,7 +463,7 @@ namespace parsertl
                         _generated_rules.insert(pair_.first);
                         pair_.second = rhs_stack_.top();
 
-                        if (_flags & enable_captures)
+                        if (_flags & *rule_flags::enable_captures)
                         {
                             rhs_stack_.top() = char_type('(') + pair_.first +
                                 char_type(')');
