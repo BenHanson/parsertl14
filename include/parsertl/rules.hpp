@@ -8,7 +8,7 @@
 
 #include "bison_lookup.hpp"
 #include "ebnf_tables.hpp"
-#include "enum_operator.h"
+#include "enum_operator.hpp"
 #include "enums.hpp"
 #include "../../../lexertl14/include/lexertl/generator.hpp"
 #include "../../../lexertl14/include/lexertl/iterator.hpp"
