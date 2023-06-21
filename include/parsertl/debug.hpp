@@ -137,15 +137,15 @@ namespace parsertl
                 if (!state_._transitions.empty())
                     stream_ << static_cast<char_type>('\n');
 
-                for (const auto& [symbol_, to_] : state_._transitions)
+                for (const auto& pair_ : state_._transitions)
                 {
                     stream_ << static_cast<char_type>(' ') <<
                         static_cast<char_type>(' ') <<
-                        symbols_[symbol_] <<
+                        symbols_[pair_.first] <<
                         static_cast<char_type>(' ') <<
                         static_cast<char_type>('-') <<
                         static_cast<char_type>('>') <<
-                        static_cast<char_type>(' ') << to_ <<
+                        static_cast<char_type>(' ') << pair_.second <<
                         static_cast<char_type>('\n');
                 }
 
