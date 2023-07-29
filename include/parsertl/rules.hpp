@@ -347,13 +347,9 @@ namespace parsertl
 
                         break;
                     }
-                    case ebnf_indexes::opt_list_1_idx:
-                        // opt_list: %empty
-                        rhs_stack_.push(string());
-                        break;
-                    case ebnf_indexes::opt_list_3_idx:
+                    case ebnf_indexes::opt_prec_list_idx:
                     {
-                        // opt_list: rhs_list opt_prec
+                        // opt_prec_list: opt_list opt_prec
                         const std::size_t size_ =
                             _ebnf_tables.yyr2[results_.entry.param];
                         const std::size_t idx_ = productions_.size() - size_;
@@ -370,6 +366,10 @@ namespace parsertl
 
                         break;
                     }
+                    case ebnf_indexes::opt_list_1_idx:
+                        // opt_list: %empty
+                        rhs_stack_.push(string());
+                        break;
                     case ebnf_indexes::rhs_list_2_idx:
                     {
                         // rhs_list: rhs_list rhs
@@ -769,6 +769,7 @@ namespace parsertl
             rule_idx = 2,
             rhs_or_1_idx,
             rhs_or_2_idx,
+            opt_prec_list_idx,
             opt_list_1_idx,
             opt_list_2_idx,
             opt_list_3_idx,
