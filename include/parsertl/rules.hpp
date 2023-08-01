@@ -311,9 +311,9 @@ namespace parsertl
             typename token_t::token_vector productions_;
             std::stack<string> rhs_stack_;
             std::stack<std::pair<string, string>> new_rules_;
-            char_type empty_or_[] =
-            { '%', 'e', 'm', 'p', 't', 'y', ' ', '|', ' ', 0 };
-            char_type or_[] = { ' ', '|', ' ', 0 };
+            static const char_type empty_or_[] =
+            { '%', 'e', 'm', 'p', 't', 'y', ' ', '|', ' ', '\0' };
+            static const char_type or_[] = { ' ', '|', ' ', '\0' };
 
             bison_next(_ebnf_tables, iter_, results_);
 
@@ -664,7 +664,7 @@ namespace parsertl
                 }
             }
 
-            static char_type accept_[] =
+            static const char_type accept_[] =
             {
                 '$', 'a', 'c', 'c', 'e', 'p', 't', '\0'
             };
