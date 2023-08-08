@@ -6,6 +6,7 @@
 #ifndef PARSERTL_ENUM_OPERATOR_HPP
 #define PARSERTL_ENUM_OPERATOR_HPP
 
+#include <cstdint>
 #include <type_traits>
 
 namespace parsertl
