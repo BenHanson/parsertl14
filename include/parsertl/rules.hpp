@@ -129,8 +129,8 @@ namespace parsertl
             lexer_rules rules_;
 
             rules_.insert_macro("TERMINAL",
-                R"('(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^'])+'|)"
-                R"(["](\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^"])+["])");
+                R"('(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^\\\r\n'])+'|)"
+                R"(\"(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^\\\r\n"])+\")");
             rules_.insert_macro("IDENTIFIER", "[A-Za-z_.][-A-Za-z_.0-9]*");
             rules_.push("{TERMINAL}",
                 static_cast<uint16_t>(ebnf_tables::yytokentype::TERMINAL));
