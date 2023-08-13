@@ -503,9 +503,9 @@ namespace parsertl
             {
                 std::ostringstream ss_;
 
-                ss_ << "Syntax error in rule '";
+                ss_ << "Syntax error in rule ";
                 narrow(lhs_.c_str(), ss_);
-                ss_ << "': '";
+                ss_ << '(' << iter_->first - rhs_.c_str() + 1 << "): '";
                 narrow(rhs_.c_str(), ss_);
                 ss_ << "'.";
                 throw runtime_error(ss_.str());
@@ -907,7 +907,6 @@ namespace parsertl
             using token_t = parsertl::token<lexer_iterator>;
             typename token_t::token_vector productions_;
             production production_(_grammar.size());
-            int brackets_ = 0;
             int curr_bracket_ = 0;
             std::stack<int> bracket_stack_;
 
@@ -940,7 +939,6 @@ namespace parsertl
                             curr_bracket_ = 0;
                         }
 
-                        ++brackets_;
                         ++curr_bracket_;
                         bracket_stack_.push(curr_bracket_);
                         _captures.back().second.emplace_back(static_cast
@@ -948,19 +946,6 @@ namespace parsertl
                                 static_cast<id_type>(0));
                         break;
                     case ')':
-                        --brackets_;
-
-                        if (brackets_ < 0)
-                        {
-                            std::ostringstream ss_;
-
-                            ss_ <<
-                                "Close bracket without open bracket in rule '";
-                            narrow(lhs_.c_str(), ss_);
-                            ss_ << "'.";
-                            throw runtime_error(ss_.str());
-                        }
-
                         _captures.back().second[static_cast<std::size_t>
                             (bracket_stack_.top()) - 1].second =
                             static_cast<id_type>(production_.
