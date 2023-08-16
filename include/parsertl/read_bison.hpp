@@ -44,19 +44,19 @@ namespace parsertl
             "| '%verbose' "
             "| '%initial-action'");
         const std::size_t token_index_ =
-            grules_.push("directive", "'%token' tokens '\n'");
+            grules_.push("directive", "'%token' tokens '\\n'");
         const std::size_t left_index_ =
-            grules_.push("directive", "'%left' tokens '\n'");
+            grules_.push("directive", "'%left' tokens '\\n'");
         const std::size_t right_index_ =
-            grules_.push("directive", "'%right' tokens '\n'");
+            grules_.push("directive", "'%right' tokens '\\n'");
         const std::size_t nonassoc_index_ = grules_.push("directive",
-            "'%nonassoc' tokens '\n'");
+            "'%nonassoc' tokens '\\n'");
         const std::size_t precedence_index_ =
-            grules_.push("directive", "'%precedence' tokens '\n'");
+            grules_.push("directive", "'%precedence' tokens '\\n'");
         const std::size_t start_index_ =
-            grules_.push("directive", "'%start' NAME '\n'");
+            grules_.push("directive", "'%start' NAME '\\n'");
 
-        grules_.push("directive", "'\n'");
+        grules_.push("directive", "'\\n'");
         grules_.push("tokens", "tokens name "
             "| name");
         grules_.push("name", "LITERAL | NAME");
@@ -92,7 +92,7 @@ namespace parsertl
         lrules_.push("%initial-action[^{]*",
             grules_.token_id("'%initial-action'"));
         lrules_.push("%left", grules_.token_id("'%left'"));
-        lrules_.push("\n", grules_.token_id("'\n'"));
+        lrules_.push("\n", grules_.token_id("'\\n'"));
         lrules_.push("%nonassoc", grules_.token_id("'%nonassoc'"));
         lrules_.push("%precedence", grules_.token_id("'%precedence'"));
         lrules_.push("%right", grules_.token_id("'%right'"));
