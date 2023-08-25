@@ -38,6 +38,17 @@ namespace parsertl
                 _rhs.swap(rhs_._rhs);
                 std::swap(_rhs_indexes, rhs_._rhs_indexes);
             }
+
+            // This operator is tuned specifically for new_grammar_ lookup only
+            bool operator<(const prod& rhs_) const
+            {
+                return _production->_lhs < rhs_._production->_lhs ||
+                    _production->_lhs == rhs_._production->_lhs &&
+                    _production->_rhs < rhs_._production->_rhs ||
+                    _production->_lhs == rhs_._production->_lhs &&
+                    _production->_rhs == rhs_._production->_rhs &&
+                    _rhs_indexes.back().second < rhs_._rhs_indexes.back().second;
+            }
         };
 
         using prod_vector = std::vector<prod>;
@@ -60,6 +71,9 @@ namespace parsertl
             new_nt_info_[new_start_]._follow_set[0] = 1;
             build_follow_sets(new_grammar_, new_nt_info_);
             sm_.clear();
+            // new_grammar_ is only used for lookup now
+            // so sort in order that std::lower_bound() can be used.
+            std::sort(new_grammar_.begin(), new_grammar_.end());
             build_table(rules_, dfa_, new_grammar_, new_nt_info_,
                 sm_, warns_);
 
@@ -532,19 +546,28 @@ namespace parsertl
                     if (production_._rhs.first.size() == c_.second)
                     {
                         char_vector follow_set_(terminals_, 0);
+                        prod key_;
+
+                        key_._production = &production_;
+                        // Only the second value is relevant for the lookup
+                        key_._rhs_indexes.emplace_back(index_, index_);
 
                         // config is reduction
-                        for (const auto& p_ : new_grammar_)
+                        for (auto iter_ = std::lower_bound(new_grammar_.begin(),
+                            new_grammar_.end(), key_), end_ = new_grammar_.end();
+                            iter_ != end_; ++iter_)
                         {
-                            if (production_._lhs == p_._production->_lhs &&
-                                production_._rhs == p_._production->_rhs &&
-                                index_ == p_._rhs_indexes.back().second)
+                            if (production_._lhs == iter_->_production->_lhs &&
+                                production_._rhs == iter_->_production->_rhs &&
+                                index_ == iter_->_rhs_indexes.back().second)
                             {
-                                const std::size_t lhs_id_ = p_._lhs;
+                                const std::size_t lhs_id_ = iter_->_lhs;
 
                                 set_union(follow_set_,
                                     new_nt_info_[lhs_id_]._follow_set);
                             }
+                            else
+                                break;
                         }
 
                         for (std::size_t id_ = 0, size_ = follow_set_.size();
