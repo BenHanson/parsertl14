@@ -7,7 +7,7 @@
 #define PARSERTL_SEARCH_ITERATOR_HPP
 
 #include "capture.hpp"
-#include "../../../lexertl14/include/lexertl/iterator.hpp"
+#include <lexertl/iterator.hpp>
 #include "match_results.hpp"
 #include "search.hpp"
 
