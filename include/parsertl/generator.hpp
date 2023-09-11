@@ -43,11 +43,11 @@ namespace parsertl
             bool operator<(const prod& rhs_) const
             {
                 return _production->_lhs < rhs_._production->_lhs ||
-                    _production->_lhs == rhs_._production->_lhs &&
-                    _production->_rhs < rhs_._production->_rhs ||
-                    _production->_lhs == rhs_._production->_lhs &&
+                    (_production->_lhs == rhs_._production->_lhs &&
+                    _production->_rhs < rhs_._production->_rhs) ||
+                    (_production->_lhs == rhs_._production->_lhs &&
                     _production->_rhs == rhs_._production->_rhs &&
-                    _rhs_indexes.back().second < rhs_._rhs_indexes.back().second;
+                    _rhs_indexes.back().second < rhs_._rhs_indexes.back().second);
             }
         };
 
