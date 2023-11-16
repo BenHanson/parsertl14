@@ -74,7 +74,7 @@ namespace parsertl
         grules_.push("prod_list", "token "
             "| prod_list token");
         grules_.push("token", "LITERAL | NAME");
-        grules_.push("prec", "%empty | '%prec' NAME");
+        grules_.push("prec", "%empty | '%prec' token");
 
         std::string warnings_;
 
@@ -123,6 +123,10 @@ namespace parsertl
             R"('(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^\\\r\n'])+'|)"
             R"(\"(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^\\\r\n"])+\")",
             grules_.token_id("LITERAL"), ".");
+        lrules_.push("PREC",
+            R"('(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^\\\r\n'])+'|)"
+            R"(\"(\\([^0-9cx]|[0-9]{1,3}|c[@a-zA-Z]|x\d+)|[^\\\r\n"])+\")",
+            grules_.token_id("LITERAL"), "PRODUCTIONS");
         lrules_.push("INITIAL,PRODUCTIONS",
             "[A-Za-z_.][-A-Za-z_.0-9]*", grules_.token_id("NAME"), ".");
         lrules_.push("PRODUCTIONS", "%%", grules_.token_id("'%%'"), "FINISH");
