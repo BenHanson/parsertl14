@@ -854,6 +854,15 @@ namespace parsertl
                 }
                 else
                 {
+                    if (lhs_.action == action::reduce &&
+                        rhs_.action == action::reduce &&
+                        // Take the earlier rule on reduce/reduce error
+                        rhs_.param < lhs_.param)
+                    {
+                        lhs_ = rhs_;
+                        modified_ = true;
+                    }
+
                     error_ = true;
                 }
             }
