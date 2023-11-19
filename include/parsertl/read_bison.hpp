@@ -70,7 +70,7 @@ namespace parsertl
         grules_.push("rule", "';'");
         grules_.push("productions", "productions '|' production prec "
             "| production prec");
-        grules_.push("production", "'%empty' | prod_list");
+        grules_.push("production", "%empty | '%empty' | prod_list");
         grules_.push("prod_list", "token "
             "| prod_list token");
         grules_.push("token", "LITERAL | NAME");

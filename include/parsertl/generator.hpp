@@ -859,7 +859,7 @@ namespace parsertl
                         // Take the earlier rule on reduce/reduce error
                         rhs_.param < lhs_.param)
                     {
-                        lhs_ = rhs_;
+                        lhs_.param = rhs_.param;
                         modified_ = true;
                     }
 
