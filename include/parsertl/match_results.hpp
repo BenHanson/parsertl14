@@ -81,19 +81,6 @@ namespace parsertl
         }
 
         template<typename token_vector>
-        typename token_vector::value_type& dollar(const std::size_t index_,
-            const sm_type& sm_, token_vector& productions) const
-        {
-            if (entry.action != action::reduce)
-            {
-                throw runtime_error("Not in a reduce state!");
-            }
-
-            return productions[productions.size() -
-                production_size(sm_, entry.param) + index_];
-        }
-
-        template<typename token_vector>
         const typename token_vector::value_type&
             dollar(const std::size_t index_, const sm_type& sm_,
                 const token_vector& productions) const

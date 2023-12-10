@@ -639,6 +639,9 @@ namespace parsertl
 
                 for (const auto& prod_ : _grammar)
                 {
+                    if (pair_.second == prod_._lhs)
+                        continue;
+
                     for (const auto& symbol_ : prod_._rhs.first)
                     {
                         if (symbol_._type == symbol::type::NON_TERMINAL &&
