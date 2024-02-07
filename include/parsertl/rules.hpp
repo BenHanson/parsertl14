@@ -77,7 +77,26 @@ namespace parsertl
         struct production
         {
             std::size_t _lhs = static_cast<std::size_t>(~0);
-            std::pair<symbol_vector, string> _rhs;
+
+            struct rhs
+            {
+                symbol_vector _symbols;
+                string _prec;
+
+                bool operator==(const rhs& rhs_) const
+                {
+                    return _symbols == rhs_._symbols &&
+                        _prec == rhs_._prec;
+                }
+
+                bool operator<(const rhs& rhs_) const
+                {
+                    return _symbols < rhs_._symbols ||
+                        _symbols == rhs_._symbols && _prec < rhs_._prec;
+                }
+            };
+
+            rhs _rhs;
             std::size_t _precedence = 0;
             associativity _associativity = associativity::token_assoc;
             std::size_t _index;
@@ -91,8 +110,8 @@ namespace parsertl
             void clear()
             {
                 _lhs = static_cast<std::size_t>(~0);
-                _rhs.first.clear();
-                _rhs.second.clear();
+                _rhs._symbols.clear();
+                _rhs._prec.clear();
                 _precedence = 0;
                 _associativity = associativity::token_assoc;
                 _index = static_cast<std::size_t>(~0);
@@ -642,7 +661,7 @@ namespace parsertl
                     if (pair_.second == prod_._lhs)
                         continue;
 
-                    for (const auto& symbol_ : prod_._rhs.first)
+                    for (const auto& symbol_ : prod_._rhs._symbols)
                     {
                         if (symbol_._type == symbol::type::NON_TERMINAL &&
                             symbol_._id == pair_.second)
@@ -694,7 +713,8 @@ namespace parsertl
                 string rhs_ = _start;
 
                 push_production(accept_, rhs_);
-                _grammar.back()._rhs.first.emplace_back(symbol::type::TERMINAL,
+                _grammar.back()._rhs._symbols.
+                    emplace_back(symbol::type::TERMINAL,
                     insert_terminal(string(1, '$')));
             }
 
@@ -846,7 +866,8 @@ namespace parsertl
                 token_ = iter_->str();
 
                 if (_terminals.find(token_) != _terminals.cend())
-                    throw runtime_error("token " + token_ + " is already defined.");
+                    throw runtime_error("token " + token_ +
+                        " is already defined.");
 
                 id_ = insert_terminal(token_);
 
@@ -947,14 +968,14 @@ namespace parsertl
                         ++curr_bracket_;
                         bracket_stack_.push(curr_bracket_);
                         _captures.back().second.emplace_back(static_cast
-                            <id_type>(production_._rhs.first.size()),
+                            <id_type>(production_._rhs._symbols.size()),
                                 static_cast<id_type>(0));
                         break;
                     case ')':
                         _captures.back().second[static_cast<std::size_t>
                             (bracket_stack_.top()) - 1].second =
                             static_cast<id_type>(production_.
-                                _rhs.first.size() - 1);
+                                _rhs._symbols.size() - 1);
                         bracket_stack_.pop();
                         break;
                     case '|':
@@ -994,7 +1015,7 @@ namespace parsertl
 
                             // NON_TERMINAL
                             location(id_);
-                            production_._rhs.first.
+                            production_._rhs._symbols.
                                 emplace_back(symbol::type::NON_TERMINAL, id_);
                         }
                         else
@@ -1010,7 +1031,7 @@ namespace parsertl
                                     token_info_._associativity;
                             }
 
-                            production_._rhs.first.
+                            production_._rhs._symbols.
                                 emplace_back(symbol::type::TERMINAL, id_);
                         }
 
@@ -1033,7 +1054,7 @@ namespace parsertl
                                 token_info_._associativity;
                         }
 
-                        production_._rhs.first.
+                        production_._rhs._symbols.
                             emplace_back(symbol::type::TERMINAL, id_);
                         break;
                     }
@@ -1053,7 +1074,7 @@ namespace parsertl
                         production_._precedence = token_info_._precedence;
                         production_._associativity =
                             token_info_._associativity;
-                        production_._rhs.second = token_;
+                        production_._rhs._prec = token_;
                         break;
                     }
                     default:

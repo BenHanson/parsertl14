@@ -24,8 +24,8 @@ namespace parsertl
 
         for (const auto& rule_ : sm_._rules)
         {
-            stream_ << rule_.first << '\n';
-            lexertl::detail::output_vec<char>(rule_.second, stream_);
+            stream_ << rule_._lhs << '\n';
+            lexertl::detail::output_vec<char>(rule_._rhs, stream_);
         }
 
         stream_ << sm_._captures.size() << '\n';
@@ -49,9 +49,9 @@ namespace parsertl
 
             for (const auto& pair_ : vec_)
             {
-                stream_ << pair_.first << ' ';
-                stream_ << static_cast<std::size_t>(pair_.second.action) << ' ';
-                stream_ << pair_.second.param << '\n';
+                stream_ << pair_._id << ' ';
+                stream_ << static_cast<std::size_t>(pair_._entry.action) << ' ';
+                stream_ << pair_._entry.param << '\n';
             }
         }
     }
@@ -81,8 +81,8 @@ namespace parsertl
 
             auto& rule_ = sm_._rules.back();
 
-            stream_ >> rule_.first;
-            lexertl::detail::input_vec<char>(stream_, rule_.second);
+            stream_ >> rule_._lhs;
+            lexertl::detail::input_vec<char>(stream_, rule_._rhs);
         }
 
         stream_ >> num_;
@@ -132,11 +132,11 @@ namespace parsertl
                 auto& pair_ = vec_.back();
 
                 stream_ >> num_;
-                pair_.first = static_cast<id_type>(num_);
+                pair_._id = static_cast<id_type>(num_);
                 stream_ >> num_;
-                pair_.second.action = static_cast<action>(num_);
+                pair_._entry.action = static_cast<action>(num_);
                 stream_ >> num_;
-                pair_.second.param = static_cast<id_type>(num_);
+                pair_._entry.param = static_cast<id_type>(num_);
             }
         }
     }

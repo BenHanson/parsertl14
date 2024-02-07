@@ -22,7 +22,13 @@ namespace parsertl
         using capture = std::pair<std::size_t, capture_vector>;
         using captures_vector = std::vector<capture>;
         using id_type_vector = std::vector<id_type>;
-        using id_type_vector_pair = std::pair<id_type, id_type_vector>;
+
+        struct id_type_vector_pair
+        {
+            id_type _lhs = 0;
+            id_type_vector _rhs;
+        };
+
         using rules = std::vector<id_type_vector_pair>;
 
         std::size_t _columns = 0;
@@ -87,7 +93,24 @@ namespace parsertl
         using base_sm = base_state_machine<id_ty>;
         using id_type = id_ty;
         using entry = typename base_sm::entry;
-        using id_type_entry_pair = std::pair<id_type, entry>;
+
+        struct id_type_entry_pair
+        {
+            id_type _id;
+            entry _entry;
+
+            id_type_entry_pair() :
+                _id(0)
+            {
+            }
+
+            id_type_entry_pair(const id_type id_, const entry& entry_) :
+                _id(id_),
+                _entry(entry_)
+            {
+            }
+        };
+
         using id_type_entry_pair_vec = std::vector<id_type_entry_pair>;
         using table = std::vector<id_type_entry_pair_vec>;
 
@@ -113,13 +136,13 @@ namespace parsertl
             auto iter_ = std::find_if(s_.begin(), s_.end(),
                 [](const auto& pair)
                 {
-                    return pair.first == 0;
+                    return pair._id == 0;
                 });
 
             if (iter_ == s_.end())
                 return entry();
             else
-                return iter_->second;
+                return iter_->_entry;
         }
 
         entry at(const std::size_t state_, const std::size_t token_id_) const
@@ -128,13 +151,13 @@ namespace parsertl
             auto iter_ = std::find_if(s_.begin(), s_.end(),
                 [token_id_](const auto& pair)
                 {
-                    return pair.first == token_id_;
+                    return pair._id == token_id_;
                 });
 
             if (iter_ == s_.end())
                 return entry();
             else
-                return iter_->second;
+                return iter_->_entry;
         }
 
         void set(const std::size_t state_, const std::size_t token_id_,
@@ -144,13 +167,13 @@ namespace parsertl
             auto iter_ = std::find_if(s_.begin(), s_.end(),
                 [token_id_](const auto& pair)
                 {
-                    return pair.first == token_id_;
+                    return pair._id == token_id_;
                 });
 
             if (iter_ == s_.end())
                 s_.emplace_back(static_cast<id_type>(token_id_), entry_);
             else
-                iter_->second = entry_;
+                iter_->_entry = entry_;
         }
 
         void push()

@@ -42,14 +42,14 @@ namespace parsertl
         case action::reduce:
         {
             const std::size_t size_ =
-                sm_._rules[results_.entry.param].second.size();
+                sm_._rules[results_.entry.param]._rhs.size();
 
             if (size_)
             {
                 results_.stack.resize(results_.stack.size() - size_);
             }
 
-            results_.token_id = sm_._rules[results_.entry.param].first;
+            results_.token_id = sm_._rules[results_.entry.param]._lhs;
             results_.entry = sm_.at(results_.stack.back(), results_.token_id);
             break;
         }
@@ -61,7 +61,7 @@ namespace parsertl
         case action::accept:
         {
             const std::size_t size_ =
-                sm_._rules[results_.entry.param].second.size();
+                sm_._rules[results_.entry.param]._rhs.size();
 
             if (size_)
             {
@@ -108,7 +108,7 @@ namespace parsertl
         case action::reduce:
         {
             const std::size_t size_ =
-                sm_._rules[results_.entry.param].second.size();
+                sm_._rules[results_.entry.param]._rhs.size();
             typename token_vector::value_type token_;
 
             if (size_)
@@ -130,7 +130,7 @@ namespace parsertl
                 }
             }
 
-            results_.token_id = sm_._rules[results_.entry.param].first;
+            results_.token_id = sm_._rules[results_.entry.param]._lhs;
             results_.entry = sm_.at(results_.stack.back(), results_.token_id);
             token_.id = results_.token_id;
             productions_.push_back(token_);
@@ -144,7 +144,7 @@ namespace parsertl
         case action::accept:
         {
             const std::size_t size_ =
-                sm_._rules[results_.entry.param].second.size();
+                sm_._rules[results_.entry.param]._rhs.size();
 
             if (size_)
             {

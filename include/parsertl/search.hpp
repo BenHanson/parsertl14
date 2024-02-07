@@ -283,7 +283,7 @@ namespace parsertl
             case action::reduce:
             {
                 const std::size_t size_ =
-                    sm_._rules[results_.entry.param].second.size();
+                    sm_._rules[results_.entry.param]._rhs.size();
 
                 if (prod_set_)
                 {
@@ -295,7 +295,7 @@ namespace parsertl
                     results_.stack.resize(results_.stack.size() - size_);
                 }
 
-                results_.token_id = sm_._rules[results_.entry.param].first;
+                results_.token_id = sm_._rules[results_.entry.param]._lhs;
                 results_.entry =
                     sm_.at(results_.stack.back(), results_.token_id);
                 break;
@@ -309,7 +309,7 @@ namespace parsertl
             case action::accept:
             {
                 const std::size_t size_ =
-                    sm_._rules[results_.entry.param].second.size();
+                    sm_._rules[results_.entry.param]._rhs.size();
 
                 if (size_)
                 {
@@ -368,7 +368,7 @@ namespace parsertl
             case action::reduce:
             {
                 const std::size_t size_ =
-                    sm_._rules[results_.entry.param].second.size();
+                    sm_._rules[results_.entry.param]._rhs.size();
                 token<lexer_iterator> token_;
 
                 if (size_)
@@ -391,7 +391,7 @@ namespace parsertl
                     }
                 }
 
-                results_.token_id = sm_._rules[results_.entry.param].first;
+                results_.token_id = sm_._rules[results_.entry.param]._lhs;
                 results_.entry =
                     sm_.at(results_.stack.back(), results_.token_id);
                 token_.id = results_.token_id;
@@ -407,7 +407,7 @@ namespace parsertl
             case action::accept:
             {
                 const std::size_t size_ =
-                    sm_._rules[results_.entry.param].second.size();
+                    sm_._rules[results_.entry.param]._rhs.size();
 
                 if (size_)
                 {
@@ -456,7 +456,7 @@ namespace parsertl
                 case action::reduce:
                 {
                     const std::size_t size_ =
-                        sm_._rules[results_.entry.param].second.size();
+                        sm_._rules[results_.entry.param]._rhs.size();
 
                     if (prod_set_)
                     {
@@ -468,7 +468,7 @@ namespace parsertl
                         results_.stack.resize(results_.stack.size() - size_);
                     }
 
-                    results_.token_id = sm_._rules[results_.entry.param].first;
+                    results_.token_id = sm_._rules[results_.entry.param]._lhs;
                     results_.entry =
                         sm_.at(results_.stack.back(), results_.token_id);
                     break;
@@ -487,7 +487,7 @@ namespace parsertl
                 if (results_.entry.action == action::accept)
                 {
                     const std::size_t size_ =
-                        sm_._rules[results_.entry.param].second.size();
+                        sm_._rules[results_.entry.param]._rhs.size();
 
                     if (size_)
                     {
@@ -538,7 +538,7 @@ namespace parsertl
                 case action::reduce:
                 {
                     const std::size_t size_ =
-                        sm_._rules[results_.entry.param].second.size();
+                        sm_._rules[results_.entry.param]._rhs.size();
                     token<lexer_iterator> token_;
 
                     if (size_)
@@ -568,7 +568,7 @@ namespace parsertl
                         }
                     }
 
-                    results_.token_id = sm_._rules[results_.entry.param].first;
+                    results_.token_id = sm_._rules[results_.entry.param]._lhs;
                     results_.entry =
                         sm_.at(results_.stack.back(), results_.token_id);
                     token_.id = results_.token_id;
@@ -590,7 +590,7 @@ namespace parsertl
                 if (results_.entry.action == action::accept)
                 {
                     const std::size_t size_ =
-                        sm_._rules[results_.entry.param].second.size();
+                        sm_._rules[results_.entry.param]._rhs.size();
 
                     if (size_)
                     {
