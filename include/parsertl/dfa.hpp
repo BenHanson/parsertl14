@@ -36,7 +36,7 @@ namespace parsertl
         bool operator<(const cursor& rhs_) const
         {
             return _id < rhs_._id ||
-                _id == rhs_._id && _index < rhs_._index;
+                (_id == rhs_._id && _index < rhs_._index);
         }
     };
 
