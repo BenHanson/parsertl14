@@ -40,7 +40,10 @@ namespace parsertl
 
         grules_.push("directive", "'%code' "
             "| '%define' "
+            "| '%debug' "
             "| '%expect' "
+            "| '%locations' "
+            "| '%type' "
             "| '%verbose' "
             "| '%initial-action'");
         const std::size_t token_index_ =
@@ -86,18 +89,21 @@ namespace parsertl
         lrules_.push_state("PREC");
 
         lrules_.push("%code[^{]*", grules_.token_id("'%code'"));
+        lrules_.push("%debug.*", grules_.token_id("'%debug'"));
         lrules_.push("%define.*", grules_.token_id("'%define'"));
         lrules_.push("%expect.*", grules_.token_id("'%expect'"));
         lrules_.push("%verbose", grules_.token_id("'%verbose'"));
-        lrules_.push("%initial-action[^{]*",
+        lrules_.push("%initial-action[^{]*[{](.|\n)*?[}];",
             grules_.token_id("'%initial-action'"));
         lrules_.push("%left", grules_.token_id("'%left'"));
+        lrules_.push("%locations", grules_.token_id("'%locations'"));
         lrules_.push("\n", grules_.token_id("'\\n'"));
         lrules_.push("%nonassoc", grules_.token_id("'%nonassoc'"));
         lrules_.push("%precedence", grules_.token_id("'%precedence'"));
         lrules_.push("%right", grules_.token_id("'%right'"));
         lrules_.push("%start", grules_.token_id("'%start'"));
         lrules_.push("%token", grules_.token_id("'%token'"));
+        lrules_.push("%type.*", grules_.token_id("'%type'"));
         lrules_.push("%union[^{]*[{](.|\n)*?[}]", lrules_.skip());
         lrules_.push("<[^>]+>", lrules_.skip());
         lrules_.push("%[{](.|\n)*?%[}]", lrules_.skip());
@@ -139,7 +145,7 @@ namespace parsertl
             "[/][*](.|\n|\r\n)*?[*][/]|[/][/].*", lrules_.skip(), ".");
         // All whitespace in PRODUCTIONS mode is skipped.
         lrules_.push("PREC,PRODUCTIONS", "\\s+", lrules_.skip(), ".");
-        lrules_.push("FINISH", "(.|\n)+", lrules_.skip(), "INITIAL");
+        lrules_.push("FINISH", "(?s:.)+", lrules_.skip(), "INITIAL");
 
         bison_lgenerator::build(lrules_, lsm_);
 
@@ -206,7 +212,17 @@ namespace parsertl
                     const token& lhs_ = results_.dollar(0, gsm_, productions_);
                     const token& rhs_ = results_.dollar(2, gsm_, productions_);
                     const string lhs_str_(lhs_.first, lhs_.second);
-                    const string rhs_str_(rhs_.first, rhs_.second);
+                    string rhs_str_;
+                    // Strip out unwanted tokens (such as blocks of C code)
+                    bison_criterator rhs_iter_(rhs_.first, rhs_.second, lsm_);
+
+                    for (; rhs_iter_->id != 0; ++rhs_iter_)
+                    {
+                        if (!rhs_str_.empty() && !::strchr(" \t\n\r%", rhs_str_.back()))
+                            rhs_str_ += ' ';
+
+                        rhs_str_ += rhs_iter_->str();
+                    }
 
                     rules_.push(lhs_str_.c_str(), rhs_str_.c_str());
                 }
