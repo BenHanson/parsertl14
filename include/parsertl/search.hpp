@@ -774,8 +774,10 @@ namespace parsertl
 
                 if (results_.entry.action == action::accept)
                 {
-                    if (const auto size_ = sm_._rules[results_.entry.param].
-                        _rhs.size(); size_)
+                    const auto size_ = sm_._rules[results_.entry.param].
+                        _rhs.size();
+
+                    if (size_)
                     {
                         results_.stack.resize(results_.stack.size() - size_);
                     }
