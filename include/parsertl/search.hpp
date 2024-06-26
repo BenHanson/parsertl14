@@ -37,6 +37,12 @@ namespace parsertl
         bool parse(lexer_iterator& iter_, const sm_type& sm_,
             basic_match_results<sm_type>& results_, token_vector& productions_,
             std::multimap<typename sm_type::id_type, token_vector>* prod_map_);
+        template<typename lexer_iterator, typename sm_type,
+            typename token_vector>
+        bool parse(lexer_iterator& iter_, const sm_type& sm_,
+            basic_match_results<sm_type>& results_, token_vector& productions_,
+            std::vector<std::pair<typename sm_type::id_type, token_vector>>*
+            prod_vec_);
     }
 
     template<typename lexer_iterator, typename sm_type, typename captures>
@@ -218,6 +224,81 @@ namespace parsertl
                 productions_.clear();
                 hit_ = details::parse(again_, sm_, results_, productions_,
                     prod_map_);
+
+                if (hit_)
+                {
+                    end_ = last_eoi_;
+                    break;
+                }
+            }
+
+            if (iter_->id != 0)
+                ++iter_;
+
+            curr_ = iter_;
+        }
+
+        return hit_;
+    }
+
+    template<typename lexer_iterator, typename sm_type, typename token_vector>
+    bool search(lexer_iterator& iter_, lexer_iterator& end_, const sm_type& sm_,
+        std::vector<std::pair<typename sm_type::id_type, token_vector>>*
+        prod_vec_ = nullptr)
+    {
+        bool hit_ = false;
+        lexer_iterator curr_ = iter_;
+        lexer_iterator last_eoi_;
+        // results_ and productions_ defined here so that
+        // allocated memory can be reused.
+        basic_match_results<sm_type> results_;
+        token_vector productions_;
+
+        end_ = lexer_iterator();
+
+        while (curr_ != end_)
+        {
+            if (prod_vec_)
+            {
+                prod_vec_->clear();
+            }
+
+            results_.reset(curr_->id, sm_);
+            productions_.clear();
+
+            while (results_.entry.action != action::accept &&
+                results_.entry.action != action::error)
+            {
+                details::next(curr_, sm_, results_, last_eoi_, productions_);
+            }
+
+            hit_ = results_.entry.action == action::accept;
+
+            if (hit_)
+            {
+                if (prod_vec_)
+                {
+                    lexer_iterator again_(iter_->first, last_eoi_->first,
+                        iter_.sm());
+
+                    results_.reset(iter_->id, sm_);
+                    productions_.clear();
+                    details::parse(again_, sm_, results_, productions_,
+                        prod_vec_);
+                }
+
+                end_ = curr_;
+                break;
+            }
+            else if (last_eoi_->id != 0)
+            {
+                lexer_iterator again_(iter_->first, last_eoi_->first,
+                    iter_.sm());
+
+                results_.reset(iter_->id, sm_);
+                productions_.clear();
+                hit_ = details::parse(again_, sm_, results_, productions_,
+                    prod_vec_);
 
                 if (hit_)
                 {
@@ -593,6 +674,108 @@ namespace parsertl
                         sm_._rules[results_.entry.param]._rhs.size();
 
                     if (size_)
+                    {
+                        results_.stack.resize(results_.stack.size() - size_);
+                    }
+
+                    break;
+                }
+            }
+
+            return results_.entry.action == action::accept;
+        }
+
+        template<typename lexer_iterator, typename sm_type,
+            typename token_vector>
+        bool parse(lexer_iterator& iter_, const sm_type& sm_,
+            basic_match_results<sm_type>& results_, token_vector& productions_,
+            std::vector<std::pair<typename sm_type::id_type, token_vector>>*
+            prod_vec_)
+        {
+            while (results_.entry.action != action::error)
+            {
+                switch (results_.entry.action)
+                {
+                case action::shift:
+                    results_.stack.push_back(results_.entry.param);
+                    productions_.emplace_back(iter_->id, iter_->first,
+                        iter_->second);
+
+                    if (iter_->id != 0)
+                        ++iter_;
+
+                    results_.token_id = iter_->id;
+
+                    if (results_.token_id == lexer_iterator::value_type::npos())
+                    {
+                        results_.entry.action = action::error;
+                        results_.entry.param =
+                            static_cast<typename sm_type::id_type>
+                            (error_type::unknown_token);
+                    }
+                    else
+                    {
+                        results_.entry =
+                            sm_.at(results_.stack.back(), results_.token_id);
+                    }
+
+                    break;
+                case action::reduce:
+                {
+                    const std::size_t size_ =
+                        sm_._rules[results_.entry.param]._rhs.size();
+                    token<lexer_iterator> token_;
+
+                    if (size_)
+                    {
+                        if (prod_vec_)
+                        {
+                            prod_vec_->emplace_back(results_.entry.
+                                param, token_vector(productions_.end() - size_,
+                                    productions_.end()));
+                        }
+
+                        token_.first = (productions_.end() - size_)->first;
+                        token_.second = productions_.back().second;
+                        results_.stack.resize(results_.stack.size() - size_);
+                        productions_.resize(productions_.size() - size_);
+                    }
+                    else
+                    {
+                        if (productions_.empty())
+                        {
+                            token_.first = token_.second = iter_->first;
+                        }
+                        else
+                        {
+                            token_.first = token_.second =
+                                productions_.back().second;
+                        }
+                    }
+
+                    results_.token_id = sm_._rules[results_.entry.param]._lhs;
+                    results_.entry =
+                        sm_.at(results_.stack.back(), results_.token_id);
+                    token_.id = results_.token_id;
+                    productions_.push_back(token_);
+                    break;
+                }
+                case action::go_to:
+                    results_.stack.push_back(results_.entry.param);
+                    results_.token_id = iter_->id;
+                    results_.entry =
+                        sm_.at(results_.stack.back(), results_.token_id);
+                    break;
+                default:
+                    // accept
+                    // error
+                    break;
+                }
+
+                if (results_.entry.action == action::accept)
+                {
+                    if (const auto size_ = sm_._rules[results_.entry.param].
+                        _rhs.size(); size_)
                     {
                         results_.stack.resize(results_.stack.size() - size_);
                     }
