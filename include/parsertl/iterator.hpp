@@ -60,6 +60,11 @@ namespace parsertl
             return _results.dollar(index_, *_sm, _productions);
         }
 
+        std::size_t production_size(const std::size_t index_) const
+        {
+            return _results.production_size(*_sm, index_);
+        }
+
         iterator& operator ++()
         {
             lookup();
