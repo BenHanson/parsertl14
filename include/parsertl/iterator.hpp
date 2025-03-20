@@ -101,6 +101,11 @@ namespace parsertl
             return !(*this == rhs_);
         }
 
+        lexer_iterator lexer_iter() const
+        {
+            return _iter;
+        }
+
     private:
         lexer_iterator _iter;
         basic_match_results<sm_type> _results;
