@@ -6,9 +6,10 @@
 #ifndef PARSERTL_STATE_MACHINE_HPP
 #define PARSERTL_STATE_MACHINE_HPP
 
+#include "enums.hpp"
+
 #include <algorithm>
 #include <cstdint>
-#include "enums.hpp"
 #include <vector>
 
 namespace parsertl

@@ -13,14 +13,10 @@ namespace parsertl
 {
     struct cursor
     {
-        std::size_t _id;
-        std::size_t _index;
+        std::size_t _id{ 0 };
+        std::size_t _index{ 0 };
 
-        cursor() :
-            _id(0),
-            _index(0)
-        {
-        }
+        cursor() = default;
 
         cursor(const std::size_t id_, const std::size_t index_) :
             _id(id_),

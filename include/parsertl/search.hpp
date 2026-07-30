@@ -6,11 +6,12 @@
 #ifndef PARSERTL_SEARCH_HPP
 #define PARSERTL_SEARCH_HPP
 
-#include <map>
 #include "match_results.hpp"
 #include "parse.hpp"
-#include <set>
 #include "token.hpp"
+
+#include <map>
+#include <set>
 
 namespace parsertl
 {

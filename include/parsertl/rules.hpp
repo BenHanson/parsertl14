@@ -10,13 +10,14 @@
 #include "ebnf_tables.hpp"
 #include "enum_operator.hpp"
 #include "enums.hpp"
-#include <lexertl/generator.hpp>
-#include <lexertl/iterator.hpp>
 #include "match_results.hpp"
 #include "narrow.hpp"
 #include "runtime_error.hpp"
-#include <lexertl/stream_num.hpp>
 #include "token.hpp"
+
+#include <lexertl/generator.hpp>
+#include <lexertl/iterator.hpp>
+#include <lexertl/stream_num.hpp>
 
 namespace parsertl
 {

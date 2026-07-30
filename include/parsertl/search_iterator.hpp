@@ -7,9 +7,10 @@
 #define PARSERTL_SEARCH_ITERATOR_HPP
 
 #include "capture.hpp"
-#include <lexertl/iterator.hpp>
 #include "match_results.hpp"
 #include "search.hpp"
+
+#include <lexertl/iterator.hpp>
 
 namespace parsertl
 {
