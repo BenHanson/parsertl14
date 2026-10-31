@@ -28,9 +28,9 @@ namespace parsertl
             entry.param = static_cast<id_type>(error_type::unknown_token);
         }
 
-        explicit basic_match_results(const std::size_t reserved_) :
-            stack(reserved_)
+        explicit basic_match_results(const std::size_t reserved_)
         {
+            stack.reserve(reserved_);
             basic_match_results();
         }
 
@@ -40,9 +40,9 @@ namespace parsertl
         }
 
         basic_match_results(const id_type token_id_, const sm_type& sm_,
-            const std::size_t reserved_) :
-            stack(reserved_)
+            const std::size_t reserved_)
         {
+            stack.reserve(reserved_);
             basic_match_results(token_id_, sm_);
         }
 
