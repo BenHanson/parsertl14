@@ -633,9 +633,10 @@ namespace parsertl
         // and false if it was already there.
         static bool set_add(char_vector& s_, const std::size_t e_)
         {
+            assert(e_ < s_.size());
+
             const char rv_ = s_[e_];
 
-            assert(e_ < s_.size());
             s_[e_] = 1;
             return !rv_;
         }
