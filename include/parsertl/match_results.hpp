@@ -23,27 +23,25 @@ namespace parsertl
 
         basic_match_results()
         {
-            stack.push_back(0);
-            entry.action = action::error;
-            entry.param = static_cast<id_type>(error_type::unknown_token);
+            init();
         }
 
         explicit basic_match_results(const std::size_t reserved_)
         {
             stack.reserve(reserved_);
-            basic_match_results();
+            init();
         }
 
         basic_match_results(const id_type token_id_, const sm_type& sm_)
         {
-            reset(token_id_, sm_);
+            init(token_id_, sm_);
         }
 
         basic_match_results(const id_type token_id_, const sm_type& sm_,
             const std::size_t reserved_)
         {
             stack.reserve(reserved_);
-            basic_match_results(token_id_, sm_);
+            init(token_id_, sm_);
         }
 
         void clear()
@@ -57,18 +55,7 @@ namespace parsertl
         void reset(const id_type token_id_, const sm_type& sm_)
         {
             stack.clear();
-            stack.push_back(0);
-            token_id = token_id_;
-
-            if (token_id == static_cast<id_type>(~0))
-            {
-                entry.action = action::error;
-                entry.param = static_cast<id_type>(error_type::unknown_token);
-            }
-            else
-            {
-                entry = sm_.at(stack.back(), token_id);
-            }
+            init(token_id_, sm_);
         }
 
         id_type reduce_id() const
@@ -119,6 +106,30 @@ namespace parsertl
             return stack == rhs_.stack &&
                 token_id == rhs_.token_id &&
                 entry == rhs_.entry;
+        }
+
+    private:
+        void init()
+        {
+            stack.push_back(0);
+            entry.action = action::error;
+            entry.param = static_cast<id_type>(error_type::unknown_token);
+        }
+
+        void init(const id_type token_id_, const sm_type& sm_)
+        {
+            stack.push_back(0);
+            token_id = token_id_;
+
+            if (token_id == static_cast<id_type>(~0))
+            {
+                entry.action = action::error;
+                entry.param = static_cast<id_type>(error_type::unknown_token);
+            }
+            else
+            {
+                entry = sm_.at(stack.back(), token_id);
+            }
         }
     };
 
