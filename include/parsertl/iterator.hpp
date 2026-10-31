@@ -47,9 +47,10 @@ namespace parsertl
             const std::size_t reserved_) :
             _iter(iter_),
             _results(_iter->id, sm_, reserved_),
-            _productions(reserved_),
             _sm(&sm_)
         {
+            _productions.reserve(reserved_);
+
             // The first action can only ever be reduce
             // if the grammar treats no input as valid.
             if (_results.entry.action != action::reduce)
