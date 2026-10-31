@@ -29,14 +29,16 @@ namespace parsertl
         typename token::token_vector productions_;
 
         captures_.clear();
-        captures_.resize(sm_._captures.back().first +
+        captures_.resize(sm_._captures.empty() ? 1 :
+            sm_._captures.back().first +
             sm_._captures.back().second.size() + 1);
         captures_[0].emplace_back(iter_->first, iter_->second);
 
         while (results_.entry.action != action::error &&
             results_.entry.action != action::accept)
         {
-            if (results_.entry.action == action::reduce)
+            if (results_.entry.action == action::reduce &&
+                sm_._captures.size() > results_.entry.param)
             {
                 const auto& row_ = sm_._captures[results_.entry.param];
 
