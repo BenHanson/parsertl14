@@ -239,7 +239,7 @@ namespace parsertl
             ss_ << "Syntax error on line " <<
                 std::count(start_, iter_->first, '\n') + 1 <<
                 ": '";
-            narrow(token_.c_str(), ss_);
+            narrow(token_, ss_);
             ss_ << '\'';
             throw runtime_error(ss_.str());
         }

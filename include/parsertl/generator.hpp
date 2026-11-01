@@ -927,7 +927,7 @@ namespace parsertl
             std::size_t index_ = 0;
 
             ss_ << " (";
-            narrow(symbols_[terminals_ + production_._lhs].c_str(), ss_);
+            narrow(symbols_[terminals_ + production_._lhs], ss_);
             ss_ << " -> ";
 
             if (sym_iter_ != sym_end_)
@@ -939,7 +939,7 @@ namespace parsertl
 
                 if (index_ == dot_) ss_ << ". ";
 
-                narrow(symbols_[id_].c_str(), ss_);
+                narrow(symbols_[id_], ss_);
                 ++sym_iter_;
                 ++index_;
             }
@@ -955,7 +955,7 @@ namespace parsertl
 
                 if (index_ == dot_) ss_ << ". ";
 
-                narrow(symbols_[id_].c_str(), ss_);
+                narrow(symbols_[id_], ss_);
             }
 
             ss_ << ')';
