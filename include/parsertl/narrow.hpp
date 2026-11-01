@@ -7,6 +7,7 @@
 #define PARSERTL_NARROW_HPP
 
 #include <sstream>
+#include <string>
 
 namespace parsertl
 {
@@ -18,6 +19,13 @@ namespace parsertl
             // Safe to simply cast to char when string only contains ASCII.
             ss_ << static_cast<char>(*str_++);
         }
+    }
+
+    template<typename char_type>
+    void narrow(const std::basic_string<char_type>& str_,
+        std::ostringstream& ss_)
+    {
+        narrow(str_.c_str(), ss_);
     }
 }
 
